@@ -806,13 +806,13 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
 .ps-step.active-step { color: var(--white); background: var(--primary); }
 
 /* Booking sections */
-.ps-bk-section { padding: 8px 12px 4px; }
-.ps-bk-label { font-size: 0.52rem; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+.ps-bk-section { padding: 10px 12px 6px; }
+.ps-bk-label { font-size: 0.52rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
 
 /* Service cards */
-.ps-service-list { display: flex; flex-direction: column; gap: 5px; }
+.ps-service-list { display: flex; flex-direction: column; gap: 6px; }
 .ps-svc-item {
-    display: flex; align-items: center; gap: 8px; padding: 8px;
+    display: flex; align-items: center; gap: 8px; padding: 10px;
     background: var(--light); border-radius: 8px; border: 1.5px solid transparent;
     position: relative;
 }
@@ -823,8 +823,8 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 .ps-svc-text { flex: 1; }
-.ps-svc-text strong { font-size: 0.58rem; color: var(--dark); display: block; }
-.ps-svc-text span { font-size: 0.42rem; color: var(--gray); }
+.ps-svc-text strong { font-size: 0.58rem; color: var(--dark); display: block; margin-bottom: 1px; }
+.ps-svc-text span { font-size: 0.42rem; color: var(--gray); line-height: 1.4; }
 .ps-svc-price { font-size: 0.5rem; font-weight: 700; color: var(--primary); }
 .ps-svc-check {
     position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
