@@ -699,14 +699,18 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
 
 /* Hero banner */
 .ps-hero {
-    background: linear-gradient(135deg, #0c4a6e 0%, #075985 50%, #0369a1 100%);
+    background: linear-gradient(to bottom, rgba(12,74,110,0.85), rgba(7,89,133,0.9)),
+        url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=80') center/cover;
     padding: 0; position: relative; overflow: hidden;
 }
 .ps-hero::after {
     content: ''; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px;
     background: rgba(6,182,212,0.12); border-radius: 50%;
 }
-.ps-hero-alt { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+.ps-hero-alt {
+    background: linear-gradient(to bottom, rgba(15,23,42,0.85), rgba(30,41,59,0.9)),
+        url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80') center/cover;
+}
 .ps-hero-nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 10px 0; }
 .ps-nav-dots { display: flex; gap: 3px; }
 .ps-nav-dots span { width: 3px; height: 3px; background: rgba(255,255,255,0.5); border-radius: 50%; }
@@ -731,15 +735,16 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
 
 /* About */
 .ps-about-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.ps-about-avatar { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: linear-gradient(135deg, #94a3b8, #64748b); }
+.ps-about-avatar { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: url('https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100&q=80') center/cover; }
 .ps-about-row strong { font-size: 0.58rem; color: var(--dark); display: block; }
 .ps-about-row span { font-size: 0.4rem; color: var(--primary); }
 .ps-about-text { font-size: 0.44rem; color: var(--gray); line-height: 1.6; }
 
 /* Photo grid */
 .ps-photo-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 4px; }
-.ps-photo { height: 36px; border-radius: 6px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
-.ps-photo-tall { grid-row: 1/3; height: 76px; background: linear-gradient(135deg, #cbd5e1, #94a3b8); }
+.ps-photo { height: 36px; border-radius: 6px; background: url('https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=200&q=80') center/cover; }
+.ps-photo:nth-child(3) { background-image: url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&q=80'); }
+.ps-photo-tall { grid-row: 1/3; height: 76px; background: url('https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=300&q=80') center/cover; border-radius: 6px; }
 
 /* Reviews */
 .ps-review-card { padding: 8px; background: var(--light); border-radius: 8px; margin-bottom: 6px; }
@@ -755,14 +760,19 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
 .ps-review-card p { font-size: 0.44rem; color: var(--gray); line-height: 1.5; font-style: italic; }
 
 /* Map placeholder */
-.ps-map-placeholder { padding: 10px; background: var(--light); border-radius: 8px; text-align: center; }
+.ps-map-placeholder {
+    padding: 10px; border-radius: 8px; text-align: center; position: relative;
+    background: linear-gradient(rgba(241,245,249,0.85), rgba(241,245,249,0.85)),
+        url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400&q=60') center/cover;
+}
 .ps-map-areas { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; margin-top: 6px; }
 .ps-map-areas span { padding: 2px 7px; background: var(--white); border-radius: 3px; font-size: 0.4rem; color: var(--dark-3); font-weight: 500; }
 
 /* Footer CTA */
 .ps-footer-cta {
-    margin: 8px 10px; padding: 12px; background: linear-gradient(135deg, #0c4a6e, #075985);
-    border-radius: 10px; text-align: center; color: var(--white);
+    margin: 8px 10px; padding: 12px; border-radius: 10px; text-align: center; color: var(--white);
+    background: linear-gradient(rgba(12,74,110,0.88), rgba(7,89,133,0.92)),
+        url('https://images.unsplash.com/photo-1620626011761-996317b8d101?w=400&q=80') center/cover;
 }
 .ps-footer-cta strong { font-size: 0.55rem; display: block; margin-bottom: 6px; }
 
@@ -778,7 +788,7 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
     display: flex; align-items: center; gap: 8px; padding: 10px 12px;
     border-bottom: 1px solid var(--light-2);
 }
-.ps-bk-avatar { width: 34px; height: 34px; min-width: 34px; border-radius: 50%; background: linear-gradient(135deg, #94a3b8, #64748b); }
+.ps-bk-avatar { width: 34px; height: 34px; min-width: 34px; border-radius: 50%; background: url('https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100&q=80') center/cover; }
 .ps-bk-info strong { font-size: 0.65rem; color: var(--dark); display: block; }
 .ps-bk-rating { font-size: 0.45rem; color: var(--gray); }
 .ps-stars-sm { color: #f59e0b; }
@@ -864,9 +874,9 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
 
 /* ===== Right Phone: Service Detail Cards ===== */
 .ps-visual-svc { border-radius: 10px; overflow: hidden; border: 1px solid var(--light-2); margin-bottom: 8px; }
-.ps-vsvc-img { height: 50px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
-.ps-vsvc-img2 { background: linear-gradient(135deg, #cbd5e1, #94a3b8); }
-.ps-vsvc-img3 { background: linear-gradient(135deg, #94a3b8, #64748b); }
+.ps-vsvc-img { height: 50px; background: url('https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&q=80') center/cover; }
+.ps-vsvc-img2 { background: url('https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&q=80') center/cover !important; }
+.ps-vsvc-img3 { background: url('https://images.unsplash.com/photo-1613545325278-f24b0cae1224?w=400&q=80') center/cover !important; }
 .ps-vsvc-body { padding: 8px; }
 .ps-vsvc-body strong { font-size: 0.58rem; color: var(--dark); display: block; margin-bottom: 2px; }
 .ps-vsvc-body p { font-size: 0.42rem; color: var(--gray); line-height: 1.4; margin-bottom: 6px; }
