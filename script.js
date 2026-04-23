@@ -126,6 +126,86 @@ contactForm.addEventListener('submit', function (e) {
     });
 });
 
+// ===== CHAT WIDGET =====
+const chatToggle = document.getElementById('chatToggle');
+const chatWidget = document.getElementById('chatWidget');
+const chatMessages = document.getElementById('chatMessages');
+const chatForm = document.getElementById('chatForm');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+const chatHistory = [];
+
+chatToggle.addEventListener('click', () => {
+    chatToggle.classList.toggle('active');
+    chatWidget.classList.toggle('open');
+    if (chatWidget.classList.contains('open')) {
+        chatInput.focus();
+    }
+});
+
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendChatMessage();
+});
+
+chatSend.addEventListener('click', sendChatMessage);
+
+chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+    }
+});
+
+function sendChatMessage() {
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+
+    chatInput.value = '';
+    appendChat('user', msg);
+
+    // Show typing indicator
+    const typingEl = document.createElement('div');
+    typingEl.className = 'chat-typing';
+    typingEl.innerHTML = '<span></span><span></span><span></span>';
+    chatMessages.appendChild(typingEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    chatSend.disabled = true;
+
+    fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, history: chatHistory })
+    })
+    .then(res => res.json())
+    .then(data => {
+        typingEl.remove();
+        appendChat('bot', data.reply);
+        chatHistory.push({ role: 'user', parts: [{ text: msg }] });
+        chatHistory.push({ role: 'model', parts: [{ text: data.reply }] });
+    })
+    .catch(() => {
+        typingEl.remove();
+        appendChat('bot', 'Sorry, I\'m having trouble connecting. Please email us at info@firstclickdigital.net or fill out the contact form below!');
+    })
+    .finally(() => {
+        chatSend.disabled = false;
+        chatInput.focus();
+    });
+}
+
+function appendChat(type, text) {
+    const wrapper = document.createElement('div');
+    wrapper.className = `chat-msg ${type}`;
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = text;
+    wrapper.appendChild(bubble);
+    chatMessages.appendChild(wrapper);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
 // Active nav link highlighting on scroll
 const sections = document.querySelectorAll('section[id]');
 window.addEventListener('scroll', () => {
