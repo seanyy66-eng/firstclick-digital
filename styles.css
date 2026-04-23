@@ -827,10 +827,9 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
 .ps-svc-text span { font-size: 0.42rem; color: var(--gray); line-height: 1.4; }
 .ps-svc-price { font-size: 0.5rem; font-weight: 700; color: var(--primary); }
 .ps-svc-check {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    width: 16px; height: 16px; background: var(--primary); color: var(--white);
+    width: 16px; height: 16px; min-width: 16px; background: var(--primary); color: var(--white);
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 0.48rem;
+    font-size: 0.48rem; margin-left: 4px;
 }
 
 /* Calendar */
