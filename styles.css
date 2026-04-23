@@ -2000,44 +2000,73 @@ button.full-width {
     .hero-container {
         grid-template-columns: 1fr;
         text-align: center;
-        padding-top: 40px;
+        padding-top: 20px;
+        gap: 24px;
     }
 
-    .hero h1 {
-        font-size: 2.2rem;
-    }
-
-    .hero-subtitle {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .hero-cta {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .hero-stats {
-        justify-content: center;
-    }
-
-    .hero-container {
-        grid-template-columns: 1fr;
-        text-align: center;
-        padding-top: 40px;
-    }
-
-    .hero h1 { font-size: 2.2rem; }
-    .hero-subtitle { margin-left: auto; margin-right: auto; }
+    .hero h1 { font-size: 2rem; }
+    .hero-subtitle { margin-left: auto; margin-right: auto; font-size: 0.95rem; }
     .hero-cta { justify-content: center; flex-wrap: wrap; }
-    .hero-stats { justify-content: center; }
-    .hero-visual { margin-top: 20px; }
-    .phone-side { display: none; }
-    .phone-center { width: 220px; }
+    .hero-stats { justify-content: center; gap: 24px; }
 
-    .scroll-indicator {
-        display: none;
+    .hero-visual {
+        justify-content: center;
+        margin-top: 10px;
     }
+
+    /* Show all 3 phones on mobile but smaller */
+    .phone-trio { gap: 0; }
+
+    .phone-center {
+        width: 180px;
+    }
+
+    .phone-center .phone-screen,
+    .phone-center .interactive-scroll { height: 340px; }
+
+    .phone-side {
+        width: 140px;
+        opacity: 0.8;
+    }
+
+    .phone-side .phone-screen,
+    .phone-side .auto-scroll-content { height: 320px; }
+
+    .phone-left {
+        margin-right: -14px;
+        transform: perspective(600px) rotateY(18deg) scale(0.82);
+        animation: floatLeftMobile 6s ease-in-out infinite;
+    }
+
+    .phone-right {
+        margin-left: -14px;
+        transform: perspective(600px) rotateY(-18deg) scale(0.82);
+        animation: floatRightMobile 6s ease-in-out infinite;
+    }
+
+    @keyframes floatLeftMobile {
+        0%, 100% { transform: perspective(600px) rotateY(18deg) scale(0.82) translateY(0); }
+        50% { transform: perspective(600px) rotateY(18deg) scale(0.82) translateY(-5px); }
+    }
+
+    @keyframes floatRightMobile {
+        0%, 100% { transform: perspective(600px) rotateY(-18deg) scale(0.82) translateY(0); }
+        50% { transform: perspective(600px) rotateY(-18deg) scale(0.82) translateY(-5px); }
+    }
+
+    .phone-mockup { border-radius: 32px; }
+    .phone-inner { border-radius: 30px; }
+    .phone-screen { border-radius: 30px; }
+    .phone-notch { width: 56px; height: 16px; top: 6px; }
+    .phone-notch::before { width: 5px; height: 5px; right: 8px; }
+    .phone-status { padding: 8px 14px 0; height: 28px; font-size: 0.4rem; }
+    .phone-home { width: 30%; height: 3px; margin: 4px auto 6px; }
+
+    .scroll-indicator { display: none; }
+    .scroll-hint { font-size: 0.45rem; }
+
+    /* Navbar mobile adjustments */
+    .navbar { top: 8px; left: 10px; right: 10px; padding: 10px 6px; border-radius: 12px; }
 
     .services-grid,
     .packages-grid,
@@ -2075,15 +2104,22 @@ button.full-width {
 }
 
 @media (max-width: 480px) {
-    .hero h1 {
-        font-size: 1.8rem;
-    }
+    .hero h1 { font-size: 1.6rem; }
+    .hero-badge { font-size: 0.7rem; }
 
     .hero-stats {
-        flex-direction: column;
-        gap: 20px;
-        align-items: center;
+        flex-direction: row;
+        gap: 16px;
     }
+
+    .stat-number { font-size: 1.5rem; }
+    .stat-label { font-size: 0.65rem; }
+
+    /* Hide side phones on very small screens */
+    .phone-side { display: none; }
+    .phone-center { width: 200px; }
+    .phone-center .phone-screen,
+    .phone-center .interactive-scroll { height: 380px; }
 
     .section-header h2,
     .why-us-content h2,
