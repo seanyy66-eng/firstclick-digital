@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirstClick Digital - Email Outreach Templates</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --dark-2: #1e293b;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --light: #f1f5f9;
+            --light-2: #e2e8f0;
+            --white: #ffffff;
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+
+        .app-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--light-2);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .app-header svg { width: 24px; height: 24px; stroke: var(--primary); }
+        .app-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; }
+        .app-header h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .app-header .badge { margin-left: auto; padding: 4px 12px; background: rgba(37,99,235,0.08); color: var(--primary); font-size: 0.75rem; font-weight: 600; border-radius: 50px; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+
+        .config-panel {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+        .config-panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 4px; }
+        .config-panel > p { color: var(--gray); font-size: 0.85rem; margin-bottom: 24px; }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--dark-2); margin-bottom: 6px; }
+        .field input, .field select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--light-2);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--light);
+            color: var(--dark);
+            outline: none;
+        }
+        .field input:focus, .field select:focus { border-color: var(--primary); }
+
+        .issue-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .issue-tags label { font-size: 0.8rem; font-weight: 600; color: var(--dark-2); margin-bottom: 6px; display: block; width: 100%; }
+        .issue-tag {
+            padding: 8px 16px;
+            border: 1.5px solid var(--light-2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--white);
+            user-select: none;
+        }
+        .issue-tag:hover { border-color: var(--primary); color: var(--primary); }
+        .issue-tag.active { background: rgba(37,99,235,0.08); border-color: var(--primary); color: var(--primary); font-weight: 600; }
+
+        .btn-generate {
+            padding: 12px 28px;
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s;
+        }
+        .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+
+        /* Templates */
+        .templates { display: flex; flex-direction: column; gap: 20px; }
+
+        .template-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .template-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: var(--light);
+            border-bottom: 1px solid var(--light-2);
+        }
+        .template-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; }
+        .template-tag {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tag-cold { background: rgba(37,99,235,0.08); color: var(--primary); }
+        .tag-warm { background: rgba(245,158,11,0.08); color: var(--orange); }
+        .tag-followup { background: rgba(34,197,94,0.08); color: var(--green); }
+
+        .template-body { padding: 24px; }
+        .email-field { margin-bottom: 12px; }
+        .email-field-label { font-size: 0.7rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .email-subject {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--dark);
+            padding: 8px 0;
+            border-bottom: 1px solid var(--light);
+            margin-bottom: 16px;
+        }
+        .email-body {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--dark-2);
+            white-space: pre-line;
+        }
+        .email-body .highlight {
+            background: rgba(37,99,235,0.08);
+            padding: 1px 4px;
+            border-radius: 3px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .template-footer {
+            display: flex;
+            gap: 8px;
+            padding: 12px 24px;
+            border-top: 1px solid var(--light);
+        }
+        .btn-copy, .btn-email {
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            border: 1px solid var(--light-2);
+            background: var(--white);
+            color: var(--dark);
+        }
+        .btn-copy:hover, .btn-email:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-copy.copied { background: var(--green); color: var(--white); border-color: var(--green); }
+
+        .tip {
+            background: rgba(37,99,235,0.06);
+            border: 1px solid rgba(37,99,235,0.12);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 0.85rem;
+            color: var(--dark-2);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .tip strong { color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .config-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <h1>First<span>Click</span> Digital &mdash; Email Templates</h1>
+        <span class="badge">Internal Tool</span>
+    </div>
+
+    <div class="container">
+        <div class="tip">
+            <strong>How to use:</strong> Fill in the business details and select what issues you've identified. We'll generate personalised cold outreach emails tailored to their specific situation. Copy and send directly, or open in your email client.
+        </div>
+
+        <div class="config-panel">
+            <h2>Personalise Your Outreach</h2>
+            <p>Enter the lead's details and we'll generate email templates targeting their specific gaps.</p>
+
+            <div class="config-grid">
+                <div class="field">
+                    <label>Business Name</label>
+                    <input type="text" id="bizName" placeholder="e.g. Mike's Plumbing">
+                </div>
+                <div class="field">
+                    <label>Contact Name (if known)</label>
+                    <input type="text" id="contactName" placeholder="e.g. Mike">
+                </div>
+                <div class="field">
+                    <label>Industry / Trade</label>
+                    <input type="text" id="industry" placeholder="e.g. Plumbing, Cafe, Salon">
+                </div>
+            </div>
+            <div class="config-grid">
+                <div class="field">
+                    <label>Location</label>
+                    <input type="text" id="location" placeholder="e.g. Parramatta, Sydney">
+                </div>
+                <div class="field">
+                    <label>Their Email (optional)</label>
+                    <input type="email" id="leadEmail" placeholder="e.g. mike@email.com">
+                </div>
+                <div class="field">
+                    <label>Your Name</label>
+                    <input type="text" id="senderName" placeholder="e.g. Sean" value="Sean">
+                </div>
+            </div>
+
+            <div class="issue-tags">
+                <label>What issues did you find? (select all that apply)</label>
+                <div class="issue-tag active" data-issue="no-website" onclick="toggleIssue(this)">No Website</div>
+                <div class="issue-tag" data-issue="poor-website" onclick="toggleIssue(this)">Poor Website</div>
+                <div class="issue-tag" data-issue="no-ssl" onclick="toggleIssue(this)">No SSL / Not Secure</div>
+                <div class="issue-tag" data-issue="not-mobile" onclick="toggleIssue(this)">Not Mobile Friendly</div>
+                <div class="issue-tag" data-issue="no-seo" onclick="toggleIssue(this)">Poor SEO</div>
+                <div class="issue-tag" data-issue="no-booking" onclick="toggleIssue(this)">No Booking System</div>
+                <div class="issue-tag" data-issue="no-gbp" onclick="toggleIssue(this)">No Google Business Profile</div>
+                <div class="issue-tag" data-issue="no-social" onclick="toggleIssue(this)">No Social Media</div>
+                <div class="issue-tag" data-issue="no-reviews" onclick="toggleIssue(this)">Few / No Reviews</div>
+                <div class="issue-tag" data-issue="slow-site" onclick="toggleIssue(this)">Slow Website</div>
+            </div>
+
+            <button class="btn-generate" onclick="generateTemplates()">Generate Email Templates</button>
+        </div>
+
+        <div class="templates" id="templatesArea"></div>
+    </div>
+
+    <script>
+    function toggleIssue(el) {
+        el.classList.toggle('active');
+    }
+
+    function getIssues() {
+        return [...document.querySelectorAll('.issue-tag.active')].map(el => el.dataset.issue);
+    }
+
+    function generateTemplates() {
+        const biz = document.getElementById('bizName').value.trim() || '[Business Name]';
+        const contact = document.getElementById('contactName').value.trim();
+        const industry = document.getElementById('industry').value.trim() || 'your industry';
+        const location = document.getElementById('location').value.trim() || 'your area';
+        const sender = document.getElementById('senderName').value.trim() || 'Sean';
+        const email = document.getElementById('leadEmail').value.trim();
+        const issues = getIssues();
+
+        const name = contact || 'there';
+        const nameGreeting = contact ? contact : 'there';
+
+        // Build issue-specific lines
+        let issuePoints = [];
+        let solutionPoints = [];
+
+        if (issues.includes('no-website')) {
+            issuePoints.push(`I noticed <span class="highlight">${biz}</span> doesn't currently have a website`);
+            solutionPoints.push('A professional, mobile-friendly website optimised for Google');
+        }
+        if (issues.includes('poor-website')) {
+            issuePoints.push(`I had a look at <span class="highlight">${biz}</span>'s current website and noticed a few areas that could be improved`);
+            solutionPoints.push('A modern redesign that loads fast, looks great on mobile, and converts visitors');
+        }
+        if (issues.includes('no-ssl')) {
+            issuePoints.push('the site is showing a "Not Secure" warning in browsers (missing SSL certificate)');
+            solutionPoints.push('SSL certificate setup so customers feel safe on your site');
+        }
+        if (issues.includes('not-mobile')) {
+            issuePoints.push('the site isn\'t mobile-friendly (over 65% of Australians search on their phone)');
+            solutionPoints.push('Full mobile-responsive redesign');
+        }
+        if (issues.includes('no-seo')) {
+            issuePoints.push('the site could be ranking much higher on Google with some SEO work');
+            solutionPoints.push('Google SEO optimisation to help you rank for local searches');
+        }
+        if (issues.includes('no-booking')) {
+            issuePoints.push('there\'s no way for customers to book online');
+            solutionPoints.push('An online booking system with calendar integration');
+        }
+        if (issues.includes('no-gbp')) {
+            issuePoints.push('the Google Business Profile isn\'t fully set up');
+            solutionPoints.push('Google Business Profile setup and optimisation');
+        }
+        if (issues.includes('no-social')) {
+            issuePoints.push('there\'s no social media presence to build trust with potential customers');
+            solutionPoints.push('Social media setup and strategy');
+        }
+        if (issues.includes('no-reviews')) {
+            issuePoints.push('there are very few online reviews, which makes it harder to build trust');
+            solutionPoints.push('Review generation strategy to build social proof');
+        }
+        if (issues.includes('slow-site')) {
+            issuePoints.push('the website is loading quite slowly, which hurts both user experience and Google rankings');
+            solutionPoints.push('Speed optimisation for faster load times');
+        }
+
+        if (issuePoints.length === 0) {
+            issuePoints.push(`I noticed <span class="highlight">${biz}</span> could benefit from a stronger online presence`);
+            solutionPoints.push('A professional website with Google SEO and booking system');
+        }
+
+        const issueText = issuePoints.length === 1
+            ? issuePoints[0]
+            : issuePoints.slice(0, -1).join(', ') + ', and ' + issuePoints[issuePoints.length - 1];
+
+        const solutionList = solutionPoints.map(s => `  \u2022 ${s}`).join('\n');
+
+        const templates = [];
+
+        // Template 1: Initial cold outreach
+        templates.push({
+            name: 'Initial Cold Outreach',
+            tag: 'cold',
+            tagLabel: 'Cold',
+            subject: `Quick question about ${biz}'s online presence`,
+            body: `Hi ${nameGreeting},
+
+I hope this doesn't come across as too forward \u2014 ${issueText}, and I thought it was worth reaching out because you've clearly got a solid business with great reviews.
+
+I run <span class="highlight">FirstClick Digital</span>, and we specialise in helping ${industry} businesses in ${location} get found online and start generating leads through Google.
+
+Here's what we could set up for ${biz}:
+
+${solutionList}
+
+We've helped businesses just like yours go from invisible online to fully booked \u2014 and we handle everything so you don't have to lift a finger.
+
+Would you be open to a quick 10-minute chat this week? No pressure, no sales pitch \u2014 just a straight-up conversation about what would actually help ${biz} grow.
+
+Cheers,
+${sender}
+FirstClick Digital
+hello@firstclickdigital.com.au`
+        });
+
+        // Template 2: Value-first approach
+        templates.push({
+            name: 'Free Audit Offer',
+            tag: 'warm',
+            tagLabel: 'Warm',
+            subject: `I put together a free report for ${biz}`,
+            body: `Hi ${nameGreeting},
+
+I was doing some research on ${industry} businesses in ${location} and came across <span class="highlight">${biz}</span>. You've got a great reputation \u2014 your reviews speak for themselves.
+
+I put together a quick digital health check for your business (completely free, no strings attached). It covers things like:
+
+  \u2022 How you're showing up (or not) on Google
+  \u2022 What your competitors are doing online
+  \u2022 Quick wins that could bring in more customers
+
+I'd love to send it through if you're interested. It takes 2 minutes to read and might give you some useful ideas, even if you don't end up working with us.
+
+Just reply to this email and I'll send it over.
+
+Cheers,
+${sender}
+FirstClick Digital
+hello@firstclickdigital.com.au`
+        });
+
+        // Template 3: Competitor angle
+        templates.push({
+            name: 'Competitor Comparison',
+            tag: 'cold',
+            tagLabel: 'Cold',
+            subject: `Your competitors in ${location} are getting ahead online`,
+            body: `Hi ${nameGreeting},
+
+I'll keep this short \u2014 I've been looking at ${industry} businesses in ${location}, and I noticed that some of your competitors have a much stronger online presence than <span class="highlight">${biz}</span>.
+
+That means when someone in ${location} searches Google for a ${industry.toLowerCase()}, they're finding your competitors first.
+
+The good news? It's a very fixable problem.
+
+At <span class="highlight">FirstClick Digital</span>, we build Google-optimised websites with online booking systems specifically for businesses like yours. We handle everything \u2014 website, domain, email, Google Ads, the lot.
+
+Here's what we could do for ${biz}:
+
+${solutionList}
+
+Would you be keen for a quick no-obligation chat? I can show you exactly what your competitors are doing and how we can get you ahead of them.
+
+Cheers,
+${sender}
+FirstClick Digital
+hello@firstclickdigital.com.au`
+        });
+
+        // Template 4: Follow-up
+        templates.push({
+            name: 'Follow-Up (3 days later)',
+            tag: 'followup',
+            tagLabel: 'Follow-Up',
+            subject: `Re: Quick question about ${biz}'s online presence`,
+            body: `Hi ${nameGreeting},
+
+Just bumping this to the top of your inbox \u2014 I know you're busy running the business.
+
+I reached out a few days ago about helping <span class="highlight">${biz}</span> get a stronger online presence. I genuinely think there's an opportunity here to get more customers finding and booking you through Google.
+
+If now's not the right time, no worries at all. But if you'd like a quick 10-minute chat (or even just want me to send through some free info), just reply and I'll sort it out.
+
+Cheers,
+${sender}
+FirstClick Digital
+hello@firstclickdigital.com.au`
+        });
+
+        // Template 5: Social proof / case study
+        templates.push({
+            name: 'Social Proof / Results',
+            tag: 'warm',
+            tagLabel: 'Warm',
+            subject: `How a ${industry} business in ${location} doubled their bookings`,
+            body: `Hi ${nameGreeting},
+
+We recently helped a ${industry.toLowerCase()} business similar to <span class="highlight">${biz}</span> go from almost zero online presence to a fully booked calendar in under 8 weeks.
+
+Here's what we did:
+
+  \u2022 Built them a professional, mobile-friendly website
+  \u2022 Set up an online booking system that syncs with their calendar
+  \u2022 Got them ranking on the first page of Google for local searches
+  \u2022 Launched targeted Google Ads within their budget
+
+The result? Their phone started ringing, bookings came in online, and they stopped losing customers to competitors who were easier to find.
+
+I'd love to do the same for ${biz}. Would you be open to a quick chat this week?
+
+Cheers,
+${sender}
+FirstClick Digital
+hello@firstclickdigital.com.au`
+        });
+
+        // Render templates
+        const area = document.getElementById('templatesArea');
+        area.innerHTML = templates.map((t, i) => {
+            const plainBody = t.body.replace(/<span class="highlight">/g, '').replace(/<\/span>/g, '');
+            const mailtoSubject = encodeURIComponent(t.subject);
+            const mailtoBody = encodeURIComponent(plainBody);
+            const mailto = email ? `mailto:${email}?subject=${mailtoSubject}&body=${mailtoBody}` : '#';
+
+            return `
+            <div class="template-card">
+                <div class="template-header">
+                    <h3>${t.name}</h3>
+                    <span class="template-tag tag-${t.tag}">${t.tagLabel}</span>
+                </div>
+                <div class="template-body">
+                    <div class="email-field">
+                        <div class="email-field-label">Subject Line</div>
+                        <div class="email-subject">${t.subject}</div>
+                    </div>
+                    <div class="email-body">${t.body}</div>
+                </div>
+                <div class="template-footer">
+                    <button class="btn-copy" onclick="copyTemplate(${i}, this)">Copy to Clipboard</button>
+                    ${email ? `<a href="${mailto}" class="btn-email" style="text-decoration:none;">Open in Email Client</a>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+        // Store plain text versions for copying
+        window._templates = templates.map(t => ({
+            subject: t.subject,
+            body: t.body.replace(/<span class="highlight">/g, '').replace(/<\/span>/g, '')
+        }));
+    }
+
+    function copyTemplate(index, btn) {
+        const t = window._templates[index];
+        const text = `Subject: ${t.subject}\n\n${t.body}`;
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = 'Copy to Clipboard';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    }
+
+    // Pre-fill from URL params (from lead scraper)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('business')) document.getElementById('bizName').value = decodeURIComponent(params.get('business'));
+    if (params.get('industry')) document.getElementById('industry').value = decodeURIComponent(params.get('industry'));
+    if (params.get('location')) document.getElementById('location').value = decodeURIComponent(params.get('location'));
+    </script>
+</body>
+</html>

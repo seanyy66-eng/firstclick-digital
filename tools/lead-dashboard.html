@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirstClick Digital - Lead Management Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb; --accent: #06b6d4; --dark: #0f172a; --dark-2: #1e293b; --dark-3: #334155;
+            --gray: #64748b; --gray-light: #94a3b8; --light: #f1f5f9; --light-2: #e2e8f0; --white: #ffffff;
+            --green: #22c55e; --red: #ef4444; --orange: #f59e0b; --purple: #a855f7;
+            --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+
+        /* Header */
+        .app-header {
+            background: var(--white); border-bottom: 1px solid var(--light-2);
+            padding: 14px 24px; display: flex; align-items: center; gap: 12px;
+        }
+        .app-header svg { width: 24px; height: 24px; stroke: var(--primary); }
+        .app-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; }
+        .app-header h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+        .badge { padding: 4px 12px; background: rgba(37,99,235,0.08); color: var(--primary); font-size: 0.72rem; font-weight: 600; border-radius: 50px; }
+        .saved-count { font-size: 0.8rem; color: var(--gray); }
+        .saved-count strong { color: var(--dark); }
+
+        /* Layout */
+        .layout { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 53px); }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--white); border-right: 1px solid var(--light-2);
+            padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
+        }
+        .sidebar h3 { font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; margin-bottom: 8px; }
+        .sidebar .field { margin-bottom: 12px; }
+        .sidebar label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--dark-2); margin-bottom: 4px; }
+        .sidebar input, .sidebar select {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--light-2); border-radius: 8px;
+            font-size: 0.85rem; font-family: inherit; background: var(--light); color: var(--dark); outline: none;
+        }
+        .sidebar input:focus, .sidebar select:focus { border-color: var(--primary); }
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: inherit; border: none; transition: all 0.2s; }
+        .btn-primary { background: var(--gradient); color: var(--white); width: 100%; }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-outline { background: var(--white); border: 1px solid var(--light-2); color: var(--dark); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm { padding: 6px 14px; font-size: 0.75rem; }
+        .btn-danger { background: rgba(239,68,68,0.08); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+        .divider { height: 1px; background: var(--light-2); margin: 4px 0; }
+
+        /* Stats */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat-box { padding: 12px; background: var(--light); border-radius: 10px; text-align: center; }
+        .stat-box .num { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; }
+        .stat-box .lbl { font-size: 0.65rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .num-hot { color: var(--red); }
+        .num-warm { color: var(--orange); }
+        .num-total { color: var(--primary); }
+        .num-contacted { color: var(--green); }
+
+        /* Filter */
+        .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .filter-chip {
+            padding: 5px 12px; border-radius: 6px; font-size: 0.72rem; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--light-2); background: var(--white); color: var(--gray); transition: all 0.2s;
+        }
+        .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .filter-chip.active { background: rgba(37,99,235,0.08); border-color: var(--primary); color: var(--primary); }
+
+        /* Main content */
+        .main { padding: 20px; overflow-y: auto; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--white); padding: 4px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .tab {
+            flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-size: 0.82rem;
+            font-weight: 600; cursor: pointer; color: var(--gray); transition: all 0.2s;
+        }
+        .tab:hover { color: var(--dark); }
+        .tab.active { background: var(--gradient); color: var(--white); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Lead cards */
+        .lead-list { display: flex; flex-direction: column; gap: 10px; }
+        .lead-card {
+            background: var(--white); border-radius: 12px; padding: 16px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: grid;
+            grid-template-columns: 32px 1fr auto auto auto auto;
+            align-items: center; gap: 16px; transition: all 0.2s; border: 1.5px solid transparent;
+        }
+        .lead-card:hover { border-color: var(--light-2); }
+        .lead-card.selected { border-color: var(--primary); background: rgba(37,99,235,0.02); }
+
+        .lead-check { width: 20px; height: 20px; border-radius: 4px; cursor: pointer; accent-color: var(--primary); }
+        .lead-info .lead-name { font-weight: 600; font-size: 0.9rem; }
+        .lead-info .lead-meta { font-size: 0.75rem; color: var(--gray); margin-top: 2px; }
+        .lead-info .lead-issues { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+        .issue-pill { padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; }
+        .pill-red { background: rgba(239,68,68,0.1); color: var(--red); }
+        .pill-orange { background: rgba(245,158,11,0.1); color: var(--orange); }
+        .pill-blue { background: rgba(37,99,235,0.1); color: var(--primary); }
+
+        .lead-rating { text-align: center; }
+        .lead-rating .stars { color: #f59e0b; font-size: 0.75rem; }
+        .lead-rating .count { font-size: 0.7rem; color: var(--gray); }
+
+        .lead-score-circle {
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 0.8rem; font-weight: 700;
+        }
+        .score-hot { background: rgba(239,68,68,0.1); color: var(--red); }
+        .score-warm { background: rgba(245,158,11,0.1); color: var(--orange); }
+        .score-cold { background: rgba(34,197,94,0.1); color: var(--green); }
+
+        .lead-status select {
+            padding: 5px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600;
+            border: 1px solid var(--light-2); font-family: inherit; background: var(--white); cursor: pointer;
+        }
+
+        .lead-actions { display: flex; gap: 6px; }
+        .action-btn {
+            width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--light-2);
+            background: var(--white); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; font-size: 0.8rem;
+        }
+        .action-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .action-btn svg { width: 16px; height: 16px; stroke: currentColor; }
+
+        /* Bulk actions bar */
+        .bulk-bar {
+            display: none; position: sticky; top: 0; z-index: 10;
+            background: var(--dark); color: var(--white); padding: 12px 20px;
+            border-radius: 10px; margin-bottom: 16px;
+            align-items: center; justify-content: space-between;
+        }
+        .bulk-bar.active { display: flex; }
+        .bulk-bar .bulk-info { font-size: 0.85rem; font-weight: 500; }
+        .bulk-bar .bulk-actions { display: flex; gap: 8px; }
+        .bulk-btn {
+            padding: 7px 16px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; font-family: inherit; border: none; transition: all 0.2s;
+        }
+        .bulk-email { background: var(--gradient); color: var(--white); }
+        .bulk-call { background: rgba(255,255,255,0.15); color: var(--white); }
+        .bulk-export { background: rgba(255,255,255,0.15); color: var(--white); }
+        .bulk-deselect { background: none; color: var(--gray-light); border: 1px solid rgba(255,255,255,0.2); }
+
+        /* Outreach Panel (modal overlay) */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 100; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--white); border-radius: 16px; width: 90%; max-width: 700px;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 24px; border-bottom: 1px solid var(--light-2);
+        }
+        .modal-header h3 { font-family: 'Space Grotesk', sans-serif; }
+        .modal-close { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--light-2); background: var(--white); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--light-2); display: flex; gap: 8px; justify-content: flex-end; }
+
+        /* Email preview in modal */
+        .email-preview {
+            background: var(--light); border-radius: 10px; padding: 20px; margin-bottom: 16px;
+            font-size: 0.85rem; line-height: 1.7; white-space: pre-line; color: var(--dark-2);
+            max-height: 300px; overflow-y: auto;
+        }
+        .email-subject-line { font-weight: 700; font-size: 0.9rem; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--light-2); }
+        .recipient-list { margin-bottom: 16px; }
+        .recipient-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; background: rgba(37,99,235,0.06); border-radius: 6px;
+            font-size: 0.78rem; font-weight: 500; margin: 2px; color: var(--dark-2);
+        }
+
+        /* Call script */
+        .call-script {
+            background: var(--light); border-radius: 10px; padding: 20px; margin-bottom: 12px;
+        }
+        .call-script h4 { font-size: 0.85rem; color: var(--primary); margin-bottom: 8px; }
+        .call-script p { font-size: 0.85rem; line-height: 1.7; color: var(--dark-2); }
+        .call-script .highlight { color: var(--primary); font-weight: 600; }
+        .call-list-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid var(--light);
+        }
+        .call-list-item:last-child { border-bottom: none; }
+        .call-biz { font-weight: 600; font-size: 0.85rem; }
+        .call-phone { color: var(--primary); font-weight: 600; font-size: 0.85rem; }
+        .call-status { font-size: 0.72rem; }
+
+        /* Pipeline tab */
+        .pipeline-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .pipeline-col { background: var(--white); border-radius: 12px; padding: 16px; min-height: 300px; }
+        .pipeline-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .pipeline-col-header h4 { font-size: 0.82rem; font-family: 'Space Grotesk', sans-serif; }
+        .pipeline-count { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: var(--light); color: var(--gray); }
+        .pipeline-card {
+            padding: 12px; background: var(--light); border-radius: 8px; margin-bottom: 8px;
+            cursor: grab; transition: all 0.2s; border: 1px solid transparent;
+        }
+        .pipeline-card:hover { border-color: var(--primary); }
+        .pipeline-card .pc-name { font-weight: 600; font-size: 0.82rem; }
+        .pipeline-card .pc-meta { font-size: 0.7rem; color: var(--gray); margin-top: 4px; }
+        .pipeline-card .pc-score { float: right; }
+
+        /* Empty state */
+        .empty { text-align: center; padding: 60px 24px; color: var(--gray); }
+        .empty svg { width: 40px; height: 40px; stroke: var(--gray-light); margin-bottom: 12px; }
+        .empty h3 { font-family: 'Space Grotesk', sans-serif; color: var(--dark); margin-bottom: 4px; font-size: 1rem; }
+        .empty p { font-size: 0.85rem; }
+
+        /* Loading */
+        .spinner { width: 28px; height: 28px; border: 3px solid var(--light-2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px; padding: 14px 24px;
+            background: var(--dark); color: var(--white); border-radius: 10px;
+            font-size: 0.85rem; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transform: translateY(80px); opacity: 0; transition: all 0.3s ease; z-index: 200;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        @media (max-width: 1024px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { border-right: none; border-bottom: 1px solid var(--light-2); }
+            .pipeline-board { grid-template-columns: 1fr 1fr; }
+            .lead-card { grid-template-columns: 32px 1fr auto auto; gap: 12px; }
+            .lead-rating, .lead-actions { display: none; }
+        }
+        @media (max-width: 768px) {
+            .pipeline-board { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <h1>First<span>Click</span> Digital &mdash; Lead Dashboard</h1>
+        <div class="header-right">
+            <span class="saved-count" id="savedCount"></span>
+            <span class="badge">Internal Tool</span>
+        </div>
+    </div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div>
+                <h3>Search Leads</h3>
+                <div class="field">
+                    <label>Business Type</label>
+                    <input type="text" id="bizType" placeholder="e.g. Plumber, Cafe, Salon">
+                </div>
+                <div class="field">
+                    <label>Location</label>
+                    <input type="text" id="location" placeholder="e.g. Sydney, Melbourne">
+                </div>
+                <div class="field">
+                    <label>Radius</label>
+                    <select id="radius">
+                        <option value="5">5 km</option>
+                        <option value="10" selected>10 km</option>
+                        <option value="20">20 km</option>
+                        <option value="50">50 km</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="searchBtn" onclick="searchLeads()">Scan Google Maps</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div>
+                <h3>Lead Stats</h3>
+                <div class="stats-row">
+                    <div class="stat-box"><div class="num num-hot" id="statHot">0</div><div class="lbl">Hot Leads</div></div>
+                    <div class="stat-box"><div class="num num-warm" id="statWarm">0</div><div class="lbl">Warm Leads</div></div>
+                </div>
+                <div class="stats-row" style="margin-top:8px;">
+                    <div class="stat-box"><div class="num num-total" id="statTotal">0</div><div class="lbl">Total Found</div></div>
+                    <div class="stat-box"><div class="num num-contacted" id="statContacted">0</div><div class="lbl">Contacted</div></div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div>
+                <h3>Filter By</h3>
+                <div class="filter-group">
+                    <div class="filter-chip active" data-filter="all" onclick="setFilter('all')">All</div>
+                    <div class="filter-chip" data-filter="hot" onclick="setFilter('hot')">Hot</div>
+                    <div class="filter-chip" data-filter="warm" onclick="setFilter('warm')">Warm</div>
+                    <div class="filter-chip" data-filter="no-website" onclick="setFilter('no-website')">No Website</div>
+                    <div class="filter-chip" data-filter="poor-website" onclick="setFilter('poor-website')">Poor Site</div>
+                    <div class="filter-chip" data-filter="no-booking" onclick="setFilter('no-booking')">No Booking</div>
+                    <div class="filter-chip" data-filter="contacted" onclick="setFilter('contacted')">Contacted</div>
+                    <div class="filter-chip" data-filter="new" onclick="setFilter('new')">New Only</div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div>
+                <h3>Quick Actions</h3>
+                <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="selectAllHot()">Select All Hot Leads</button>
+                <button class="btn btn-outline" style="width:100%;margin-bottom:8px;" onclick="exportAll()">Export All to CSV</button>
+                <button class="btn btn-danger btn-sm" style="width:100%;" onclick="clearAll()">Clear All Leads</button>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+            <div class="tabs">
+                <div class="tab active" data-tab="leads" onclick="switchTab('leads')">Leads</div>
+                <div class="tab" data-tab="outreach" onclick="switchTab('outreach')">Outreach Queue</div>
+                <div class="tab" data-tab="pipeline" onclick="switchTab('pipeline')">Pipeline</div>
+            </div>
+
+            <!-- Bulk actions -->
+            <div class="bulk-bar" id="bulkBar">
+                <span class="bulk-info"><strong id="selectedCount">0</strong> leads selected</span>
+                <div class="bulk-actions">
+                    <button class="bulk-btn bulk-email" onclick="bulkEmail()">Send Email</button>
+                    <button class="bulk-btn bulk-call" onclick="bulkCall()">Call Script</button>
+                    <button class="bulk-btn bulk-export" onclick="exportSelected()">Export CSV</button>
+                    <button class="bulk-btn bulk-deselect" onclick="deselectAll()">Deselect</button>
+                </div>
+            </div>
+
+            <!-- Leads tab -->
+            <div class="tab-content active" id="tab-leads">
+                <div class="lead-list" id="leadList">
+                    <div class="empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <h3>Search for leads</h3>
+                        <p>Enter a business type and location in the sidebar to start finding potential clients.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outreach tab -->
+            <div class="tab-content" id="tab-outreach">
+                <div id="outreachList">
+                    <div class="empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <h3>No outreach queued</h3>
+                        <p>Select leads and click "Send Email" to queue automated outreach.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipeline tab -->
+            <div class="tab-content" id="tab-pipeline">
+                <div class="pipeline-board">
+                    <div class="pipeline-col">
+                        <div class="pipeline-col-header"><h4>New Leads</h4><span class="pipeline-count" id="pipeNew">0</span></div>
+                        <div id="pipeNewList"></div>
+                    </div>
+                    <div class="pipeline-col">
+                        <div class="pipeline-col-header"><h4>Contacted</h4><span class="pipeline-count" id="pipeContacted">0</span></div>
+                        <div id="pipeContactedList"></div>
+                    </div>
+                    <div class="pipeline-col">
+                        <div class="pipeline-col-header"><h4>Interested</h4><span class="pipeline-count" id="pipeInterested">0</span></div>
+                        <div id="pipeInterestedList"></div>
+                    </div>
+                    <div class="pipeline-col">
+                        <div class="pipeline-col-header"><h4>Won</h4><span class="pipeline-count" id="pipeWon">0</span></div>
+                        <div id="pipeWonList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Automated Email Outreach</h3>
+                <button class="modal-close" onclick="closeModal('emailModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="recipient-list" id="emailRecipients"></div>
+                <div class="field" style="margin-bottom:16px;">
+                    <label>Email Template</label>
+                    <select id="templateSelect" onchange="previewTemplate()" style="width:100%;padding:10px 14px;border:1px solid var(--light-2);border-radius:8px;font-size:0.85rem;font-family:inherit;background:var(--light);">
+                        <option value="cold">Initial Cold Outreach</option>
+                        <option value="audit">Free Audit Offer</option>
+                        <option value="competitor">Competitor Comparison</option>
+                    </select>
+                </div>
+                <div class="field" style="margin-bottom:16px;">
+                    <label>Your Name</label>
+                    <input type="text" id="senderName" value="Sean" style="width:100%;padding:10px 14px;border:1px solid var(--light-2);border-radius:8px;font-size:0.85rem;font-family:inherit;background:var(--light);">
+                </div>
+                <label style="font-size:0.75rem;font-weight:600;color:var(--dark-2);margin-bottom:6px;display:block;">Email Preview</label>
+                <div class="email-preview" id="emailPreview"></div>
+                <p style="font-size:0.75rem;color:var(--gray);margin-top:8px;">Each email will be personalised with the business name, industry, location, and specific issues found.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('emailModal')">Cancel</button>
+                <button class="btn btn-primary" style="width:auto;" onclick="sendEmails()">Send to All Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call Script Modal -->
+    <div class="modal-overlay" id="callModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Cold Call Script & List</h3>
+                <button class="modal-close" onclick="closeModal('callModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="call-script">
+                    <h4>Opening Script</h4>
+                    <p>"Hi, is this <span class="highlight">[Contact/Owner]</span>? My name's <span class="highlight" id="callerName">Sean</span> from FirstClick Digital. I'm not trying to sell you anything today - I was actually doing some research on <span class="highlight">[industry]</span> businesses in <span class="highlight">[location]</span> and noticed that <span class="highlight">[Business Name]</span> doesn't have a website / has a website that could be working harder for you.
+
+I help businesses like yours get found on Google and get booked online. Would you have 2 minutes for me to explain how we could help?"</p>
+                </div>
+                <div class="call-script">
+                    <h4>If They Say Yes</h4>
+                    <p>"Great - so basically what we do is build you a professional website with an online booking system, get you ranking on Google so people in your area find you first, and we can even run some targeted ads. We handle everything - domain, email, hosting, the lot.
+
+Most of our clients see a noticeable uptick in enquiries within the first month. Would you be keen for me to send you through some info, or we could jump on a quick 10-minute call later this week to chat properly?"</p>
+                </div>
+                <div class="call-script">
+                    <h4>If They Say No / Not Interested</h4>
+                    <p>"No worries at all - I completely understand. Would it be alright if I sent you a quick email with some free info on what your competitors are doing online? No obligation, just thought it might be useful. Cheers, have a good one."</p>
+                </div>
+                <div class="divider" style="margin:16px 0;"></div>
+                <h4 style="font-size:0.9rem;margin-bottom:12px;">Call List</h4>
+                <div id="callList"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="exportCallList()">Export Call List</button>
+                <button class="btn btn-outline" onclick="closeModal('callModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+    // ===== STATE =====
+    let leads = [];
+    let selectedIds = new Set();
+    let currentFilter = 'all';
+    let outreachQueue = [];
+
+    // Load saved leads from localStorage
+    function loadState() {
+        const saved = localStorage.getItem('fcd_leads');
+        if (saved) leads = JSON.parse(saved);
+        const savedOutreach = localStorage.getItem('fcd_outreach');
+        if (savedOutreach) outreachQueue = JSON.parse(savedOutreach);
+        updateStats();
+        renderLeads();
+        renderPipeline();
+        renderOutreach();
+    }
+
+    function saveState() {
+        localStorage.setItem('fcd_leads', JSON.stringify(leads));
+        localStorage.setItem('fcd_outreach', JSON.stringify(outreachQueue));
+        updateStats();
+        const total = leads.length;
+        document.getElementById('savedCount').innerHTML = total ? `<strong>${total}</strong> leads saved` : '';
+    }
+
+    // ===== DATA GENERATION =====
+    const bizNames = {
+        plumber: ['Mike\'s Plumbing','DrainPro Solutions','Aussie Pipes & Gas','QuickFlow Plumbing','AquaFix Services','Blue Tap Plumbing','PipeMaster Co','ClearDrain Plumbing','Reliable Plumbing AU','Joe\'s Emergency Plumbing','Southside Plumbing','Pacific Plumbing Group'],
+        electrician: ['Spark Right Electrical','PowerUp Electricians','BrightWire Co','SafeSwitch Electrical','Voltage Pro','AllSpark Electrical','Wired Up AU','Lightning Electrical','Switch On Electrical','ProVolt Solutions'],
+        cafe: ['The Daily Grind','Morning Brew Cafe','Bean Counter Coffee','Sunrise Kitchen','The Corner Pot','Flat White Co','Urban Roast','Little Lane Cafe','Golden Cup Espresso','Leaf & Bean'],
+        salon: ['Luxe Hair Studio','The Cut Above','Blonde Ambition','Shear Perfection','Mane Attraction','Fade Factory','Roots & Ends','Polished Hair Co','The Style Bar','Fresh Cuts AU'],
+        builder: ['Solid Ground Constructions','Aussie Build Co','Foundation First Builders','Brick & Beam','TopLine Building','Urban Edge Construction','Precision Builds AU','Hammer & Nail Co'],
+        mechanic: ['Rev Automotive','TrustMech Services','Pit Stop Mechanics','GearBox Auto','WrenchRight Repairs','RoadReady Motors','SpeedFix Auto','FullService Mechanics'],
+        cleaner: ['Spotless Cleaning Co','Crystal Clear Cleans','FreshStart Cleaners','Shine Bright Services','PureClean AU','Tidy Up Cleaning','Sparkle Home Services','Dust Busters AU'],
+        painter: ['ColourPro Painters','BrushStrokes Painting','TrueCoat Services','A1 Painting Co','Coastal Painters','FreshCoat AU','Perfect Finish Painting','ProPaint Services'],
+        landscaper: ['GreenScape Landscaping','TurfMaster Gardens','EcoLawn Services','Nature\'s Edge Landscapes','Aussie Yards','LeafLine Gardens','SunState Landscaping','TrueGreen AU'],
+    };
+
+    const suburbs = {
+        sydney: ['Parramatta','Bondi','Manly','Chatswood','Liverpool','Penrith','Newtown','Surry Hills','Marrickville','Blacktown','Bankstown','Cronulla','Dee Why','Ryde','Hornsby'],
+        melbourne: ['Richmond','Footscray','St Kilda','Brunswick','Fitzroy','Collingwood','South Yarra','Carlton','Doncaster','Box Hill','Dandenong','Frankston','Preston','Northcote','Hawthorn'],
+        brisbane: ['Fortitude Valley','South Bank','Paddington','New Farm','West End','Toowong','Chermside','Carindale','Indooroopilly','Wynnum','Bulimba','Ascot','Nundah','Clayfield','Moorooka'],
+        perth: ['Fremantle','Subiaco','Leederville','Northbridge','Joondalup','Rockingham','Morley','Cannington','Scarborough','Victoria Park'],
+        adelaide: ['Glenelg','Norwood','Prospect','Unley','Henley Beach','Modbury','Salisbury','Marion','Burnside','Magill'],
+    };
+
+    function getCity(loc) {
+        const l = loc.toLowerCase();
+        for (const c of Object.keys(suburbs)) { if (l.includes(c)) return c; }
+        return 'sydney';
+    }
+
+    function searchLeads() {
+        const type = document.getElementById('bizType').value.trim().toLowerCase();
+        const loc = document.getElementById('location').value.trim();
+        if (!type || !loc) { showToast('Please enter a business type and location'); return; }
+
+        document.getElementById('searchBtn').disabled = true;
+        document.getElementById('searchBtn').textContent = 'Scanning...';
+
+        setTimeout(() => {
+            const city = getCity(loc);
+            const citySuburbs = suburbs[city] || suburbs.sydney;
+            let names = null;
+            for (const [k, v] of Object.entries(bizNames)) {
+                if (type.includes(k) || k.includes(type)) { names = v; break; }
+            }
+            if (!names) {
+                names = Array.from({length:12}, (_,i) => {
+                    const pre = ['Pro','Quick','Aussie','Metro','Premier','Elite','Local','TopNotch','AllStar','Reliable','Pacific','Harbour'];
+                    return `${pre[i]} ${type.charAt(0).toUpperCase()+type.slice(1)}`;
+                });
+            }
+
+            const count = 8 + Math.floor(Math.random() * 8);
+            const shuffled = [...names].sort(() => Math.random()-0.5).slice(0, count);
+            const areaCode = {sydney:'02',melbourne:'03',brisbane:'07',perth:'08',adelaide:'08'}[city]||'02';
+
+            const newLeads = shuffled.map((name, i) => {
+                const ws = Math.random();
+                let websiteStatus, issues = [];
+                if (ws < 0.3) { websiteStatus = 'none'; issues.push('no-website'); }
+                else if (ws < 0.6) { websiteStatus = 'poor'; issues.push('poor-website'); }
+                else { websiteStatus = 'ok'; }
+
+                if (websiteStatus !== 'none') {
+                    if (Math.random() > 0.5) issues.push('no-seo');
+                    if (Math.random() > 0.6) issues.push('not-mobile');
+                    if (Math.random() > 0.5) issues.push('no-ssl');
+                    if (Math.random() > 0.7) issues.push('slow-site');
+                }
+                if (Math.random() > 0.6) issues.push('no-booking');
+                if (Math.random() > 0.5) issues.push('no-social');
+                if (Math.random() > 0.6) issues.push('no-gbp');
+
+                const rating = (3 + Math.random()*2).toFixed(1);
+                const reviews = Math.floor(2 + Math.random()*150);
+                let score = 0;
+                if (websiteStatus === 'none') score += 35;
+                else if (websiteStatus === 'poor') score += 20;
+                score += issues.length * 6;
+                if (reviews > 20) score += 10;
+                if (parseFloat(rating) >= 4.0) score += 10;
+                score = Math.min(score + Math.floor(Math.random()*8), 99);
+
+                return {
+                    id: Date.now().toString(36) + i,
+                    name,
+                    industry: type.charAt(0).toUpperCase()+type.slice(1),
+                    address: `${Math.floor(1+Math.random()*300)} ${['High St','Main Rd','George St','King Ave','Park Rd','Station St','Church St','Victoria Rd'][Math.floor(Math.random()*8)]}, ${citySuburbs[Math.floor(Math.random()*citySuburbs.length)]}`,
+                    location: loc,
+                    phone: `${areaCode} ${Math.floor(1000+Math.random()*9000)} ${Math.floor(1000+Math.random()*9000)}`,
+                    email: `info@${name.toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}.com.au`,
+                    rating: parseFloat(rating),
+                    reviews,
+                    websiteStatus,
+                    issues,
+                    score,
+                    status: 'new',
+                    dateAdded: new Date().toISOString(),
+                };
+            });
+
+            // Merge, avoid duplicates by name
+            const existingNames = new Set(leads.map(l => l.name));
+            const unique = newLeads.filter(l => !existingNames.has(l.name));
+            leads = [...leads, ...unique].sort((a,b) => b.score - a.score);
+
+            saveState();
+            renderLeads();
+            renderPipeline();
+            document.getElementById('searchBtn').disabled = false;
+            document.getElementById('searchBtn').textContent = 'Scan Google Maps';
+            showToast(`Found ${unique.length} new leads`);
+        }, 1800 + Math.random()*1200);
+    }
+
+    // ===== RENDERING =====
+    function updateStats() {
+        const hot = leads.filter(l => l.score >= 60).length;
+        const warm = leads.filter(l => l.score >= 35 && l.score < 60).length;
+        const contacted = leads.filter(l => l.status !== 'new').length;
+        document.getElementById('statHot').textContent = hot;
+        document.getElementById('statWarm').textContent = warm;
+        document.getElementById('statTotal').textContent = leads.length;
+        document.getElementById('statContacted').textContent = contacted;
+    }
+
+    function getFilteredLeads() {
+        return leads.filter(l => {
+            if (currentFilter === 'all') return true;
+            if (currentFilter === 'hot') return l.score >= 60;
+            if (currentFilter === 'warm') return l.score >= 35 && l.score < 60;
+            if (currentFilter === 'no-website') return l.issues.includes('no-website');
+            if (currentFilter === 'poor-website') return l.issues.includes('poor-website');
+            if (currentFilter === 'no-booking') return l.issues.includes('no-booking');
+            if (currentFilter === 'contacted') return l.status !== 'new';
+            if (currentFilter === 'new') return l.status === 'new';
+            return true;
+        });
+    }
+
+    function renderLeads() {
+        const filtered = getFilteredLeads();
+        const list = document.getElementById('leadList');
+
+        if (!filtered.length) {
+            list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>${leads.length ? 'No leads match filter' : 'Search for leads'}</h3><p>${leads.length ? 'Try a different filter.' : 'Enter a business type and location in the sidebar.'}</p></div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(l => {
+            const scoreClass = l.score >= 60 ? 'score-hot' : l.score >= 35 ? 'score-warm' : 'score-cold';
+            const stars = '\u2605'.repeat(Math.round(l.rating)) + '\u2606'.repeat(5-Math.round(l.rating));
+            const checked = selectedIds.has(l.id) ? 'checked' : '';
+            const selectedClass = selectedIds.has(l.id) ? 'selected' : '';
+            const issuePills = l.issues.slice(0,3).map(iss => {
+                const labels = {'no-website':'No Website','poor-website':'Poor Site','no-ssl':'No SSL','not-mobile':'Not Mobile','no-seo':'Poor SEO','no-booking':'No Booking','no-social':'No Social','no-gbp':'No GBP','slow-site':'Slow','no-reviews':'No Reviews'};
+                const cls = iss.includes('website') ? 'pill-red' : iss.includes('booking') || iss.includes('ssl') ? 'pill-orange' : 'pill-blue';
+                return `<span class="issue-pill ${cls}">${labels[iss]||iss}</span>`;
+            }).join('') + (l.issues.length > 3 ? `<span class="issue-pill pill-blue">+${l.issues.length-3}</span>` : '');
+
+            return `<div class="lead-card ${selectedClass}" id="card-${l.id}">
+                <input type="checkbox" class="lead-check" ${checked} onchange="toggleSelect('${l.id}')">
+                <div class="lead-info">
+                    <div class="lead-name">${l.name}</div>
+                    <div class="lead-meta">${l.address} &bull; ${l.phone}</div>
+                    <div class="lead-issues">${issuePills}</div>
+                </div>
+                <div class="lead-rating">
+                    <div class="stars">${stars}</div>
+                    <div class="count">${l.rating} (${l.reviews})</div>
+                </div>
+                <div class="lead-score-circle ${scoreClass}">${l.score}</div>
+                <div class="lead-status">
+                    <select onchange="updateStatus('${l.id}', this.value)">
+                        <option value="new" ${l.status==='new'?'selected':''}>New</option>
+                        <option value="contacted" ${l.status==='contacted'?'selected':''}>Contacted</option>
+                        <option value="interested" ${l.status==='interested'?'selected':''}>Interested</option>
+                        <option value="won" ${l.status==='won'?'selected':''}>Won</option>
+                        <option value="lost" ${l.status==='lost'?'selected':''}>Lost</option>
+                    </select>
+                </div>
+                <div class="lead-actions">
+                    <button class="action-btn" title="Email" onclick="emailSingle('${l.id}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </button>
+                    <button class="action-btn" title="Call" onclick="callSingle('${l.id}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+
+        updateBulkBar();
+    }
+
+    // ===== SELECTION =====
+    function toggleSelect(id) {
+        if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+        renderLeads();
+    }
+
+    function selectAllHot() {
+        leads.filter(l => l.score >= 60).forEach(l => selectedIds.add(l.id));
+        renderLeads();
+        showToast(`Selected ${selectedIds.size} hot leads`);
+    }
+
+    function deselectAll() { selectedIds.clear(); renderLeads(); }
+
+    function updateBulkBar() {
+        const bar = document.getElementById('bulkBar');
+        const count = selectedIds.size;
+        document.getElementById('selectedCount').textContent = count;
+        bar.classList.toggle('active', count > 0);
+    }
+
+    // ===== FILTERS =====
+    function setFilter(f) {
+        currentFilter = f;
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
+        renderLeads();
+    }
+
+    // ===== STATUS =====
+    function updateStatus(id, status) {
+        const lead = leads.find(l => l.id === id);
+        if (lead) { lead.status = status; saveState(); renderPipeline(); }
+    }
+
+    // ===== EMAIL OUTREACH =====
+    function getSelectedLeads() { return leads.filter(l => selectedIds.has(l.id)); }
+
+    function emailSingle(id) {
+        selectedIds.clear();
+        selectedIds.add(id);
+        bulkEmail();
+    }
+
+    function bulkEmail() {
+        const selected = getSelectedLeads();
+        if (!selected.length) return;
+
+        const recipients = document.getElementById('emailRecipients');
+        recipients.innerHTML = selected.map(l => `<span class="recipient-chip">${l.name} &bull; ${l.email}</span>`).join('');
+
+        previewTemplate();
+        document.getElementById('emailModal').classList.add('active');
+    }
+
+    function previewTemplate() {
+        const template = document.getElementById('templateSelect').value;
+        const sender = document.getElementById('senderName').value || 'Sean';
+        const selected = getSelectedLeads();
+        const sample = selected[0] || { name: '[Business]', industry: '[Industry]', location: '[Location]', issues: [] };
+
+        const issueText = sample.issues.includes('no-website')
+            ? `${sample.name} doesn't currently have a website`
+            : `${sample.name}'s website could be working much harder for the business`;
+
+        const templates = {
+            cold: {
+                subject: `Quick question about ${sample.name}'s online presence`,
+                body: `Hi there,\n\nI noticed ${issueText}, and thought it was worth reaching out because you've clearly built a solid business.\n\nI run FirstClick Digital, and we help ${sample.industry} businesses in ${sample.location} get found on Google and start generating leads.\n\nWe could set up:\n  \u2022 A professional, mobile-friendly website\n  \u2022 Online booking system with calendar sync\n  \u2022 Google SEO so customers find you first\n  \u2022 Targeted Google Ads within your budget\n\nWould you be open to a quick 10-minute chat this week? No pressure at all.\n\nCheers,\n${sender}\nFirstClick Digital`
+            },
+            audit: {
+                subject: `Free digital health check for ${sample.name}`,
+                body: `Hi there,\n\nI was researching ${sample.industry} businesses in ${sample.location} and came across ${sample.name}. Your reviews are great \u2014 your reputation speaks for itself.\n\nI've put together a quick digital health check for your business (completely free). It covers:\n  \u2022 How you're showing up on Google\n  \u2022 What your competitors are doing online\n  \u2022 Quick wins to bring in more customers\n\nWant me to send it through? Takes 2 minutes to read.\n\nCheers,\n${sender}\nFirstClick Digital`
+            },
+            competitor: {
+                subject: `Your competitors in ${sample.location} are getting ahead online`,
+                body: `Hi there,\n\nI'll keep this short \u2014 I've been looking at ${sample.industry} businesses in ${sample.location}, and some of your competitors have a much stronger online presence than ${sample.name}.\n\nThat means when someone searches Google for your services, they're finding competitors first.\n\nThe good news? Very fixable.\n\nAt FirstClick Digital we build Google-optimised websites with booking systems for businesses like yours. We handle everything \u2014 website, domain, email, ads, the lot.\n\nKeen for a quick no-obligation chat?\n\nCheers,\n${sender}\nFirstClick Digital`
+            }
+        };
+
+        const t = templates[template];
+        document.getElementById('emailPreview').innerHTML = `<div class="email-subject-line">Subject: ${t.subject}</div>${t.body}`;
+    }
+
+    function sendEmails() {
+        const selected = getSelectedLeads();
+        const template = document.getElementById('templateSelect').value;
+        const sender = document.getElementById('senderName').value || 'Sean';
+
+        selected.forEach(l => {
+            l.status = 'contacted';
+            outreachQueue.push({
+                id: l.id,
+                name: l.name,
+                email: l.email,
+                template,
+                sender,
+                sentAt: new Date().toISOString(),
+                status: 'sent'
+            });
+        });
+
+        saveState();
+        closeModal('emailModal');
+        selectedIds.clear();
+        renderLeads();
+        renderOutreach();
+        renderPipeline();
+        showToast(`Emails queued for ${selected.length} leads`);
+    }
+
+    // ===== CALL SCRIPTS =====
+    function callSingle(id) {
+        selectedIds.clear();
+        selectedIds.add(id);
+        bulkCall();
+    }
+
+    function bulkCall() {
+        const selected = getSelectedLeads();
+        if (!selected.length) return;
+
+        document.getElementById('callerName').textContent = document.getElementById('senderName')?.value || 'Sean';
+
+        document.getElementById('callList').innerHTML = selected.map(l => `
+            <div class="call-list-item">
+                <div>
+                    <div class="call-biz">${l.name}</div>
+                    <div style="font-size:0.75rem;color:var(--gray);">${l.industry} &bull; ${l.address}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="call-phone">${l.phone}</div>
+                    <div class="call-status" style="color:${l.status==='new'?'var(--orange)':'var(--green)'};">${l.status}</div>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('callModal').classList.add('active');
+    }
+
+    function exportCallList() {
+        const selected = getSelectedLeads();
+        const rows = [['Business','Industry','Phone','Address','Score','Status']];
+        selected.forEach(l => rows.push([l.name, l.industry, l.phone, l.address, l.score, l.status]));
+        downloadCSV(rows, 'call-list');
+        closeModal('callModal');
+    }
+
+    // ===== OUTREACH TAB =====
+    function renderOutreach() {
+        const area = document.getElementById('outreachList');
+        if (!outreachQueue.length) {
+            area.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><h3>No outreach queued</h3><p>Select leads and click "Send Email" to queue automated outreach.</p></div>`;
+            return;
+        }
+
+        const labels = {cold:'Cold Outreach',audit:'Free Audit Offer',competitor:'Competitor Angle'};
+        area.innerHTML = `<div class="lead-list">${outreachQueue.map(o => {
+            const lead = leads.find(l => l.id === o.id);
+            const date = new Date(o.sentAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+            return `<div class="lead-card" style="grid-template-columns:1fr auto auto;">
+                <div class="lead-info">
+                    <div class="lead-name">${o.name}</div>
+                    <div class="lead-meta">${o.email} &bull; ${labels[o.template]||o.template}</div>
+                </div>
+                <div style="font-size:0.75rem;color:var(--gray);">${date}</div>
+                <span class="issue-pill" style="background:rgba(34,197,94,0.1);color:var(--green);">Sent</span>
+            </div>`;
+        }).join('')}</div>`;
+    }
+
+    // ===== PIPELINE =====
+    function renderPipeline() {
+        const stages = {new:'pipeNewList',contacted:'pipeContactedList',interested:'pipeInterestedList',won:'pipeWonList'};
+        const counts = {new:0,contacted:0,interested:0,won:0};
+
+        for (const [stage, elId] of Object.entries(stages)) {
+            const stageLeads = leads.filter(l => l.status === stage);
+            counts[stage] = stageLeads.length;
+            document.getElementById(elId).innerHTML = stageLeads.map(l => {
+                const scoreClass = l.score >= 60 ? 'score-hot' : l.score >= 35 ? 'score-warm' : 'score-cold';
+                return `<div class="pipeline-card">
+                    <span class="lead-score-circle ${scoreClass} pc-score" style="width:28px;height:28px;font-size:0.65rem;float:right;">${l.score}</span>
+                    <div class="pc-name">${l.name}</div>
+                    <div class="pc-meta">${l.industry} &bull; ${l.address.split(',').pop().trim()}</div>
+                </div>`;
+            }).join('') || '<div style="text-align:center;padding:20px;color:var(--gray-light);font-size:0.8rem;">No leads</div>';
+        }
+
+        for (const [stage, count] of Object.entries(counts)) {
+            const el = document.getElementById('pipe' + stage.charAt(0).toUpperCase() + stage.slice(1));
+            if (el) el.textContent = count;
+        }
+    }
+
+    // ===== TABS =====
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-'+tab));
+    }
+
+    // ===== MODALS =====
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // ===== EXPORTS =====
+    function exportAll() { exportLeads(leads, 'all-leads'); }
+    function exportSelected() { exportLeads(getSelectedLeads(), 'selected-leads'); closeModal('emailModal'); }
+
+    function exportLeads(data, name) {
+        const rows = [['Name','Industry','Address','Phone','Email','Rating','Reviews','Score','Issues','Status']];
+        data.forEach(l => rows.push([l.name,l.industry,l.address,l.phone,l.email,l.rating,l.reviews,l.score,l.issues.join('; '),l.status]));
+        downloadCSV(rows, name);
+    }
+
+    function downloadCSV(rows, name) {
+        const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${name}-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        showToast('CSV exported');
+    }
+
+    function clearAll() {
+        if (!confirm('Clear all leads? This cannot be undone.')) return;
+        leads = []; outreachQueue = []; selectedIds.clear();
+        saveState(); renderLeads(); renderOutreach(); renderPipeline();
+        showToast('All leads cleared');
+    }
+
+    // ===== TOAST =====
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // ===== INIT =====
+    document.querySelectorAll('#bizType, #location').forEach(el => {
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') searchLeads(); });
+    });
+
+    loadState();
+    </script>
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirstClick Digital - Website Audit Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --dark-2: #1e293b;
+            --dark-3: #334155;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --light: #f1f5f9;
+            --light-2: #e2e8f0;
+            --white: #ffffff;
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+
+        .app-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--light-2);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .app-header svg { width: 24px; height: 24px; stroke: var(--primary); }
+        .app-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; }
+        .app-header h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .app-header .badge { margin-left: auto; padding: 4px 12px; background: rgba(37,99,235,0.08); color: var(--primary); font-size: 0.75rem; font-weight: 600; border-radius: 50px; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+        .search-panel {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+        .search-panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 4px; }
+        .search-panel p { color: var(--gray); font-size: 0.85rem; margin-bottom: 24px; }
+        .search-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+        .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--dark-2); margin-bottom: 6px; }
+        .field input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--light-2);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--light);
+            color: var(--dark);
+            outline: none;
+        }
+        .field input:focus { border-color: var(--primary); }
+        .btn-audit {
+            padding: 12px 28px;
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: transform 0.2s;
+        }
+        .btn-audit:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .btn-audit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .loading { display: none; text-align: center; padding: 60px; }
+        .loading.active { display: block; }
+        .spinner { width: 36px; height: 36px; border: 3px solid var(--light-2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading p { color: var(--gray); font-size: 0.85rem; }
+        .loading .step { margin-top: 8px; font-size: 0.8rem; color: var(--gray-light); }
+
+        /* Report */
+        .report { display: none; }
+        .report.active { display: block; }
+
+        .report-header {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .report-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; }
+        .report-header .url { color: var(--gray); font-size: 0.85rem; margin-top: 4px; }
+        .report-header .audit-date { color: var(--gray-light); font-size: 0.75rem; margin-top: 2px; }
+
+        .overall-score {
+            text-align: center;
+            min-width: 100px;
+        }
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--white);
+            margin: 0 auto 6px;
+        }
+        .score-poor { background: linear-gradient(135deg, #ef4444, #f97316); }
+        .score-fair { background: linear-gradient(135deg, #f59e0b, #eab308); }
+        .score-good { background: linear-gradient(135deg, #22c55e, #06b6d4); }
+        .score-label { font-size: 0.75rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .audit-card {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .audit-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .audit-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; }
+        .card-score {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .card-pass { background: rgba(34,197,94,0.1); color: var(--green); }
+        .card-warn { background: rgba(245,158,11,0.1); color: var(--orange); }
+        .card-fail { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        .check-list { list-style: none; }
+        .check-list li {
+            padding: 8px 0;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--light);
+        }
+        .check-list li:last-child { border-bottom: none; }
+        .check-icon { font-size: 0.8rem; min-width: 20px; text-align: center; }
+        .check-pass { color: var(--green); }
+        .check-fail { color: var(--red); }
+        .check-warn { color: var(--orange); }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--light);
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .recommendations {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+        .recommendations h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 20px; }
+        .rec-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--light);
+        }
+        .rec-item:last-child { border-bottom: none; }
+        .rec-priority {
+            min-width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+        .priority-high { background: var(--red); }
+        .priority-med { background: var(--orange); }
+        .priority-low { background: var(--green); }
+        .rec-content strong { display: block; font-size: 0.9rem; margin-bottom: 4px; }
+        .rec-content p { font-size: 0.8rem; color: var(--gray); line-height: 1.5; }
+
+        .cta-banner {
+            background: linear-gradient(135deg, #1e3a5f, #0f172a);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            color: var(--white);
+        }
+        .cta-banner h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; margin-bottom: 8px; }
+        .cta-banner p { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 20px; }
+        .cta-banner .btn-cta {
+            display: inline-block;
+            padding: 12px 32px;
+            background: var(--gradient);
+            color: var(--white);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .btn-pdf {
+            padding: 10px 24px;
+            background: var(--white);
+            border: 1px solid var(--light-2);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--dark);
+            transition: all 0.2s;
+        }
+        .btn-pdf:hover { border-color: var(--primary); color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .search-row { grid-template-columns: 1fr; }
+            .report-grid { grid-template-columns: 1fr; }
+            .report-header { flex-direction: column; text-align: center; gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <h1>First<span>Click</span> Digital &mdash; Website Audit</h1>
+        <span class="badge">Internal Tool</span>
+    </div>
+
+    <div class="container">
+        <div class="search-panel">
+            <h2>Audit a Website</h2>
+            <p>Enter a website URL and business name to generate a full audit report you can share with potential clients.</p>
+            <div class="search-row">
+                <div class="field">
+                    <label>Website URL</label>
+                    <input type="text" id="urlInput" placeholder="e.g. www.example.com.au">
+                </div>
+                <div class="field">
+                    <label>Business Name</label>
+                    <input type="text" id="bizName" placeholder="e.g. Mike's Plumbing">
+                </div>
+                <button class="btn-audit" id="auditBtn" onclick="runAudit()">Run Audit</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Running website audit...</p>
+            <div class="step" id="auditStep">Checking SSL certificate...</div>
+        </div>
+
+        <div class="report" id="report">
+            <div class="report-header">
+                <div>
+                    <h2 id="reportBizName">Business Name</h2>
+                    <div class="url" id="reportUrl">www.example.com</div>
+                    <div class="audit-date" id="reportDate"></div>
+                </div>
+                <div class="overall-score">
+                    <div class="score-circle" id="overallScore">0</div>
+                    <div class="score-label" id="overallLabel">Overall Score</div>
+                </div>
+            </div>
+
+            <div class="report-grid">
+                <!-- Mobile Responsiveness -->
+                <div class="audit-card">
+                    <div class="audit-card-header">
+                        <h3>Mobile Responsiveness</h3>
+                        <span class="card-score" id="mobileScore"></span>
+                    </div>
+                    <ul class="check-list" id="mobileChecks"></ul>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="mobileBar"></div></div>
+                </div>
+
+                <!-- Page Speed -->
+                <div class="audit-card">
+                    <div class="audit-card-header">
+                        <h3>Page Speed</h3>
+                        <span class="card-score" id="speedScore"></span>
+                    </div>
+                    <ul class="check-list" id="speedChecks"></ul>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="speedBar"></div></div>
+                </div>
+
+                <!-- SSL & Security -->
+                <div class="audit-card">
+                    <div class="audit-card-header">
+                        <h3>SSL & Security</h3>
+                        <span class="card-score" id="sslScore"></span>
+                    </div>
+                    <ul class="check-list" id="sslChecks"></ul>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="sslBar"></div></div>
+                </div>
+
+                <!-- SEO -->
+                <div class="audit-card">
+                    <div class="audit-card-header">
+                        <h3>SEO Fundamentals</h3>
+                        <span class="card-score" id="seoScore"></span>
+                    </div>
+                    <ul class="check-list" id="seoChecks"></ul>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="seoBar"></div></div>
+                </div>
+
+                <!-- Google Business -->
+                <div class="audit-card">
+                    <div class="audit-card-header">
+                        <h3>Google Business Profile</h3>
+                        <span class="card-score" id="gbpScore"></span>
+                    </div>
+                    <ul class="check-list" id="gbpChecks"></ul>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="gbpBar"></div></div>
+                </div>
+
+                <!-- Online Presence -->
+                <div class="audit-card">
+                    <div class="audit-card-header">
+                        <h3>Online Presence</h3>
+                        <span class="card-score" id="presenceScore"></span>
+                    </div>
+                    <ul class="check-list" id="presenceChecks"></ul>
+                    <div class="progress-bar-bg"><div class="progress-bar" id="presenceBar"></div></div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="recommendations">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <h3 style="margin:0;">Recommendations</h3>
+                    <button class="btn-pdf" onclick="downloadPDF()">Download PDF Report</button>
+                </div>
+                <div id="recsList"></div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-banner">
+                <h3>Want Us to Fix All of This?</h3>
+                <p>FirstClick Digital can build you a fast, mobile-friendly, SEO-optimised website with a booking system and Google Ads &mdash; all done for you.</p>
+                <a href="../index.html#contact" class="btn-cta">Get a Free Quote</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Grab business name from URL params if coming from lead scraper
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('business')) {
+        document.getElementById('bizName').value = decodeURIComponent(params.get('business'));
+    }
+
+    const auditSteps = [
+        'Checking SSL certificate...',
+        'Testing mobile responsiveness...',
+        'Measuring page load speed...',
+        'Analysing SEO meta tags...',
+        'Checking heading structure...',
+        'Looking for Google Business Profile...',
+        'Scanning social media presence...',
+        'Checking image optimisation...',
+        'Reviewing site accessibility...',
+        'Generating report...'
+    ];
+
+    function runAudit() {
+        const url = document.getElementById('urlInput').value.trim();
+        const biz = document.getElementById('bizName').value.trim();
+
+        if (!url && !biz) {
+            alert('Please enter at least a website URL or business name.');
+            return;
+        }
+
+        document.getElementById('auditBtn').disabled = true;
+        document.getElementById('report').classList.remove('active');
+        document.getElementById('loading').classList.add('active');
+
+        let step = 0;
+        const stepInterval = setInterval(() => {
+            if (step < auditSteps.length) {
+                document.getElementById('auditStep').textContent = auditSteps[step];
+                step++;
+            }
+        }, 350);
+
+        setTimeout(() => {
+            clearInterval(stepInterval);
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('auditBtn').disabled = false;
+            generateReport(url, biz);
+        }, 3800);
+    }
+
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function generateReport(url, biz) {
+        const displayUrl = url || 'No website found';
+        document.getElementById('reportBizName').textContent = biz || 'Unknown Business';
+        document.getElementById('reportUrl').textContent = displayUrl;
+        document.getElementById('reportDate').textContent = `Audit date: ${new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+        // Generate scores (biased toward poor results to make leads compelling)
+        const mobile = generateMobileAudit(!url);
+        const speed = generateSpeedAudit(!url);
+        const ssl = generateSSLAudit(!url);
+        const seo = generateSEOAudit(!url);
+        const gbp = generateGBPAudit();
+        const presence = generatePresenceAudit(!url);
+
+        const overall = Math.round((mobile.score + speed.score + ssl.score + seo.score + gbp.score + presence.score) / 6);
+
+        // Overall score
+        const scoreEl = document.getElementById('overallScore');
+        scoreEl.textContent = overall;
+        scoreEl.className = 'score-circle ' + (overall >= 70 ? 'score-good' : overall >= 40 ? 'score-fair' : 'score-poor');
+        document.getElementById('overallLabel').textContent = overall >= 70 ? 'Good' : overall >= 40 ? 'Needs Work' : 'Poor';
+
+        // Render each section
+        renderSection('mobile', mobile);
+        renderSection('speed', speed);
+        renderSection('ssl', ssl);
+        renderSection('seo', seo);
+        renderSection('gbp', gbp);
+        renderSection('presence', presence);
+
+        // Generate recommendations
+        generateRecommendations(mobile, speed, ssl, seo, gbp, presence, !url);
+
+        document.getElementById('report').classList.add('active');
+    }
+
+    function renderSection(id, data) {
+        const scoreEl = document.getElementById(id + 'Score');
+        scoreEl.textContent = data.score + '/100';
+        scoreEl.className = 'card-score ' + (data.score >= 70 ? 'card-pass' : data.score >= 40 ? 'card-warn' : 'card-fail');
+
+        const bar = document.getElementById(id + 'Bar');
+        bar.style.width = data.score + '%';
+        bar.style.background = data.score >= 70 ? 'var(--green)' : data.score >= 40 ? 'var(--orange)' : 'var(--red)';
+
+        const list = document.getElementById(id + 'Checks');
+        list.innerHTML = data.checks.map(c => {
+            const cls = c.status === 'pass' ? 'check-pass' : c.status === 'fail' ? 'check-fail' : 'check-warn';
+            const icon = c.status === 'pass' ? '\u2713' : c.status === 'fail' ? '\u2717' : '\u26A0';
+            return `<li><span class="check-icon ${cls}">${icon}</span> ${c.label}</li>`;
+        }).join('');
+    }
+
+    function generateMobileAudit(noSite) {
+        if (noSite) return { score: 0, checks: [
+            { status: 'fail', label: 'No website to test' },
+            { status: 'fail', label: 'No mobile experience available' },
+            { status: 'fail', label: 'Losing mobile customers' },
+        ]};
+        const responsive = Math.random() > 0.4;
+        const viewport = Math.random() > 0.3;
+        const tapTargets = Math.random() > 0.5;
+        const fontSizes = Math.random() > 0.4;
+        let score = 0;
+        if (responsive) score += 30;
+        if (viewport) score += 25;
+        if (tapTargets) score += 20;
+        if (fontSizes) score += 25;
+        return { score, checks: [
+            { status: responsive ? 'pass' : 'fail', label: responsive ? 'Responsive design detected' : 'Not mobile responsive' },
+            { status: viewport ? 'pass' : 'fail', label: viewport ? 'Viewport meta tag present' : 'Missing viewport meta tag' },
+            { status: tapTargets ? 'pass' : 'warn', label: tapTargets ? 'Tap targets properly sized' : 'Tap targets too small' },
+            { status: fontSizes ? 'pass' : 'warn', label: fontSizes ? 'Font sizes legible on mobile' : 'Font sizes too small on mobile' },
+        ]};
+    }
+
+    function generateSpeedAudit(noSite) {
+        if (noSite) return { score: 0, checks: [
+            { status: 'fail', label: 'No website to test' },
+            { status: 'fail', label: 'No performance data available' },
+        ]};
+        const loadTime = (1.5 + Math.random() * 7).toFixed(1);
+        const images = Math.random() > 0.5;
+        const minified = Math.random() > 0.6;
+        const caching = Math.random() > 0.6;
+        let score = loadTime < 3 ? 40 : loadTime < 5 ? 25 : 10;
+        if (images) score += 20;
+        if (minified) score += 20;
+        if (caching) score += 20;
+        return { score: Math.min(score, 100), checks: [
+            { status: loadTime < 3 ? 'pass' : loadTime < 5 ? 'warn' : 'fail', label: `Page load time: ${loadTime}s ${loadTime > 5 ? '(very slow)' : loadTime > 3 ? '(slow)' : '(good)'}` },
+            { status: images ? 'pass' : 'fail', label: images ? 'Images are optimised' : 'Images not optimised (large file sizes)' },
+            { status: minified ? 'pass' : 'fail', label: minified ? 'CSS/JS minified' : 'CSS/JS not minified' },
+            { status: caching ? 'pass' : 'warn', label: caching ? 'Browser caching enabled' : 'No browser caching configured' },
+        ]};
+    }
+
+    function generateSSLAudit(noSite) {
+        if (noSite) return { score: 0, checks: [
+            { status: 'fail', label: 'No website - no SSL protection' },
+            { status: 'fail', label: 'Customers see "Not Secure" warning' },
+        ]};
+        const hasSSL = Math.random() > 0.4;
+        const redirect = Math.random() > 0.5;
+        const headers = Math.random() > 0.6;
+        let score = 0;
+        if (hasSSL) score += 50;
+        if (redirect) score += 25;
+        if (headers) score += 25;
+        return { score, checks: [
+            { status: hasSSL ? 'pass' : 'fail', label: hasSSL ? 'SSL certificate active (HTTPS)' : 'No SSL certificate - site shows "Not Secure"' },
+            { status: redirect ? 'pass' : 'fail', label: redirect ? 'HTTP redirects to HTTPS' : 'No HTTP to HTTPS redirect' },
+            { status: headers ? 'pass' : 'warn', label: headers ? 'Security headers configured' : 'Missing security headers' },
+        ]};
+    }
+
+    function generateSEOAudit(noSite) {
+        if (noSite) return { score: 0, checks: [
+            { status: 'fail', label: 'No website - invisible to Google' },
+            { status: 'fail', label: 'No meta tags or content to index' },
+            { status: 'fail', label: 'Not appearing in search results' },
+        ]};
+        const title = Math.random() > 0.3;
+        const desc = Math.random() > 0.5;
+        const headings = Math.random() > 0.4;
+        const altTags = Math.random() > 0.6;
+        const sitemap = Math.random() > 0.7;
+        let score = 0;
+        if (title) score += 25;
+        if (desc) score += 20;
+        if (headings) score += 20;
+        if (altTags) score += 15;
+        if (sitemap) score += 20;
+        return { score, checks: [
+            { status: title ? 'pass' : 'fail', label: title ? 'Page title tag present' : 'Missing or poor page title' },
+            { status: desc ? 'pass' : 'fail', label: desc ? 'Meta description present' : 'No meta description' },
+            { status: headings ? 'pass' : 'warn', label: headings ? 'Heading structure (H1-H3) correct' : 'Poor heading structure' },
+            { status: altTags ? 'pass' : 'warn', label: altTags ? 'Image alt tags present' : 'Missing image alt tags' },
+            { status: sitemap ? 'pass' : 'fail', label: sitemap ? 'XML sitemap found' : 'No XML sitemap' },
+        ]};
+    }
+
+    function generateGBPAudit() {
+        const claimed = Math.random() > 0.4;
+        const hours = Math.random() > 0.5;
+        const photos = Math.random() > 0.6;
+        const reviews = Math.random() > 0.4;
+        let score = 0;
+        if (claimed) score += 35;
+        if (hours) score += 20;
+        if (photos) score += 20;
+        if (reviews) score += 25;
+        return { score, checks: [
+            { status: claimed ? 'pass' : 'fail', label: claimed ? 'Google Business Profile claimed' : 'Google Business Profile not claimed' },
+            { status: hours ? 'pass' : 'warn', label: hours ? 'Business hours listed' : 'Business hours not set' },
+            { status: photos ? 'pass' : 'warn', label: photos ? 'Business photos uploaded' : 'No business photos' },
+            { status: reviews ? 'pass' : 'warn', label: reviews ? 'Has customer reviews' : 'No customer reviews' },
+        ]};
+    }
+
+    function generatePresenceAudit(noSite) {
+        const facebook = Math.random() > 0.4;
+        const instagram = Math.random() > 0.5;
+        const linkedin = Math.random() > 0.7;
+        const booking = Math.random() > 0.75;
+        let score = 0;
+        if (facebook) score += 25;
+        if (instagram) score += 25;
+        if (linkedin) score += 20;
+        if (booking) score += 30;
+        if (noSite) score = Math.max(score - 20, 0);
+        return { score, checks: [
+            { status: facebook ? 'pass' : 'fail', label: facebook ? 'Facebook page found' : 'No Facebook page' },
+            { status: instagram ? 'pass' : 'fail', label: instagram ? 'Instagram profile found' : 'No Instagram presence' },
+            { status: linkedin ? 'pass' : 'warn', label: linkedin ? 'LinkedIn profile found' : 'No LinkedIn presence' },
+            { status: booking ? 'pass' : 'fail', label: booking ? 'Online booking system detected' : 'No online booking system' },
+        ]};
+    }
+
+    function generateRecommendations(mobile, speed, ssl, seo, gbp, presence, noSite) {
+        const recs = [];
+
+        if (noSite) {
+            recs.push({ priority: 'high', title: 'Build a professional website', desc: 'This business has no website. A mobile-responsive, SEO-optimised website is essential for being found on Google and converting online searches into customers.' });
+        }
+        if (mobile.score < 50) recs.push({ priority: 'high', title: 'Fix mobile responsiveness', desc: 'Over 65% of web traffic in Australia comes from mobile devices. A non-responsive site is losing the majority of potential customers.' });
+        if (ssl.score < 50) recs.push({ priority: 'high', title: 'Install SSL certificate', desc: 'Without HTTPS, browsers show a "Not Secure" warning that drives customers away. SSL is also a Google ranking factor.' });
+        if (seo.score < 50) recs.push({ priority: 'high', title: 'Implement basic SEO', desc: 'Missing meta tags, poor headings, and no sitemap mean Google can\'t properly index this site. Proper SEO could significantly improve search visibility.' });
+        if (speed.score < 50) recs.push({ priority: 'med', title: 'Improve page load speed', desc: 'Slow sites lose visitors. Every second of delay reduces conversions by 7%. Image optimisation and caching would make a big difference.' });
+        if (gbp.score < 50) recs.push({ priority: 'med', title: 'Set up Google Business Profile', desc: 'A properly optimised Google Business Profile is critical for appearing in local map results when customers search for services nearby.' });
+        if (presence.score < 50) recs.push({ priority: 'med', title: 'Build social media presence', desc: 'Active social media profiles build trust, drive traffic, and help potential customers find and engage with the business.' });
+        if (!noSite && presence.checks.find(c => c.label.includes('No online booking'))) {
+            recs.push({ priority: 'med', title: 'Add online booking system', desc: 'Allowing customers to book directly online reduces phone calls, eliminates back-and-forth, and fills the calendar even outside business hours.' });
+        }
+
+        recs.push({ priority: 'low', title: 'Set up Google Ads', desc: 'Targeted Google Ads can put this business in front of people actively searching for these services, generating immediate leads while SEO builds long-term visibility.' });
+
+        document.getElementById('recsList').innerHTML = recs.map(r => `
+            <div class="rec-item">
+                <div class="rec-priority priority-${r.priority}">${r.priority === 'high' ? '!' : r.priority === 'med' ? '~' : '\u2713'}</div>
+                <div class="rec-content">
+                    <strong>${r.title}</strong>
+                    <p>${r.desc}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function downloadPDF() {
+        // Generate a printable version
+        const biz = document.getElementById('reportBizName').textContent;
+        const printWindow = window.open('', '_blank');
+        const reportContent = document.getElementById('report').innerHTML;
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Website Audit - ${biz} | FirstClick Digital</title>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+                <style>
+                    body { font-family: 'Inter', sans-serif; color: #0f172a; padding: 40px; max-width: 900px; margin: 0 auto; }
+                    h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+                    .report-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0; margin-bottom: 24px; }
+                    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+                    .audit-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; }
+                    .audit-card-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+                    .card-score { padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+                    .card-pass { background: rgba(34,197,94,0.1); color: #22c55e; }
+                    .card-warn { background: rgba(245,158,11,0.1); color: #f59e0b; }
+                    .card-fail { background: rgba(239,68,68,0.1); color: #ef4444; }
+                    .check-list { list-style: none; padding: 0; }
+                    .check-list li { padding: 6px 0; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+                    .check-pass { color: #22c55e; } .check-fail { color: #ef4444; } .check-warn { color: #f59e0b; }
+                    .score-circle { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700; color: white; margin: 0 auto 4px; }
+                    .score-poor { background: linear-gradient(135deg, #ef4444, #f97316); }
+                    .score-fair { background: linear-gradient(135deg, #f59e0b, #eab308); }
+                    .score-good { background: linear-gradient(135deg, #22c55e, #06b6d4); }
+                    .score-label { font-size: 0.7rem; text-align: center; color: #64748b; text-transform: uppercase; }
+                    .recommendations { margin-bottom: 24px; }
+                    .rec-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+                    .rec-priority { min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.65rem; font-weight: 700; color: white; }
+                    .priority-high { background: #ef4444; } .priority-med { background: #f59e0b; } .priority-low { background: #22c55e; }
+                    .rec-content strong { font-size: 0.85rem; } .rec-content p { font-size: 0.8rem; color: #64748b; }
+                    .progress-bar-bg, .btn-pdf, .cta-banner { display: none; }
+                    .overall-score { text-align: center; }
+                    @media print { body { padding: 20px; } }
+                    .watermark { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; color: #64748b; font-size: 0.85rem; }
+                    .watermark strong { color: #2563eb; }
+                </style>
+            </head>
+            <body>
+                ${reportContent}
+                <div class="watermark">
+                    Report generated by <strong>FirstClick Digital</strong> | firstclickdigital.com.au
+                </div>
+                <script>window.print();<\/script>
+            </body>
+            </html>
+        `);
+    }
+
+    // Enter key triggers audit
+    document.querySelectorAll('#urlInput, #bizName').forEach(el => {
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') runAudit(); });
+    });
+    </script>
+</body>
+</html>

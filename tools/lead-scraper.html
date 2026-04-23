@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirstClick Digital - Lead Scraper</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --dark-2: #1e293b;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --light: #f1f5f9;
+            --light-2: #e2e8f0;
+            --white: #ffffff;
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+
+        .app-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--light-2);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .app-header svg { width: 24px; height: 24px; stroke: var(--primary); }
+        .app-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; }
+        .app-header h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .app-header .badge { margin-left: auto; padding: 4px 12px; background: rgba(37,99,235,0.08); color: var(--primary); font-size: 0.75rem; font-weight: 600; border-radius: 50px; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+        /* Search Panel */
+        .search-panel {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+        .search-panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 4px; }
+        .search-panel p { color: var(--gray); font-size: 0.85rem; margin-bottom: 24px; }
+        .search-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+        .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--dark-2); margin-bottom: 6px; }
+        .field input, .field select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--light-2);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--light);
+            color: var(--dark);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .field input:focus, .field select:focus { border-color: var(--primary); }
+        .btn-search {
+            padding: 12px 28px;
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-search:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .btn-search:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Results */
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .results-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; }
+        .results-count { font-size: 0.8rem; color: var(--gray); }
+        .btn-export {
+            padding: 8px 20px;
+            background: var(--white);
+            border: 1px solid var(--light-2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--dark);
+            transition: all 0.2s;
+        }
+        .btn-export:hover { border-color: var(--primary); color: var(--primary); }
+
+        .results-table {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--light); }
+        th { padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 14px 16px; font-size: 0.85rem; border-top: 1px solid var(--light-2); }
+        tr:hover td { background: rgba(37,99,235,0.02); }
+
+        .biz-name { font-weight: 600; color: var(--dark); }
+        .biz-address { color: var(--gray); font-size: 0.8rem; margin-top: 2px; }
+        .rating { display: flex; align-items: center; gap: 6px; }
+        .stars { color: #f59e0b; font-size: 0.8rem; }
+        .review-count { color: var(--gray); font-size: 0.75rem; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .status-none { background: rgba(239,68,68,0.1); color: var(--red); }
+        .status-poor { background: rgba(245,158,11,0.1); color: var(--orange); }
+        .status-ok { background: rgba(34,197,94,0.1); color: var(--green); }
+
+        .lead-score {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .score-hot { background: rgba(239,68,68,0.1); color: var(--red); }
+        .score-warm { background: rgba(245,158,11,0.1); color: var(--orange); }
+        .score-cold { background: rgba(34,197,94,0.1); color: var(--green); }
+
+        .btn-action {
+            padding: 6px 14px;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-action:hover { background: var(--primary); color: var(--white); }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--gray);
+        }
+        .empty-state svg { width: 48px; height: 48px; stroke: var(--gray-light); margin-bottom: 16px; }
+        .empty-state h3 { font-family: 'Space Grotesk', sans-serif; color: var(--dark); margin-bottom: 8px; }
+        .empty-state p { font-size: 0.9rem; }
+
+        .loading { display: none; text-align: center; padding: 40px; }
+        .loading.active { display: block; }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--light-2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading p { color: var(--gray); font-size: 0.85rem; }
+
+        .tip-bar {
+            background: rgba(37,99,235,0.06);
+            border: 1px solid rgba(37,99,235,0.12);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: var(--dark-2);
+            line-height: 1.5;
+        }
+        .tip-bar strong { color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .search-row { grid-template-columns: 1fr; }
+            .results-table { overflow-x: auto; }
+            table { min-width: 700px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <h1>First<span>Click</span> Digital &mdash; Lead Scraper</h1>
+        <span class="badge">Internal Tool</span>
+    </div>
+
+    <div class="container">
+        <div class="tip-bar">
+            <strong>How it works:</strong> Search for a business type and location to find businesses on Google Maps. We flag businesses with no website, poor websites, or missing online presence &mdash; your hottest leads.
+        </div>
+
+        <div class="search-panel">
+            <h2>Find Leads</h2>
+            <p>Enter a trade or business type and a location to search Google Maps for potential clients.</p>
+            <div class="search-row">
+                <div class="field">
+                    <label>Business Type</label>
+                    <input type="text" id="businessType" placeholder="e.g. Plumber, Electrician, Cafe, Salon">
+                </div>
+                <div class="field">
+                    <label>Location</label>
+                    <input type="text" id="location" placeholder="e.g. Sydney CBD, Melbourne, Brisbane">
+                </div>
+                <div class="field">
+                    <label>Radius</label>
+                    <select id="radius">
+                        <option value="5">5 km</option>
+                        <option value="10" selected>10 km</option>
+                        <option value="20">20 km</option>
+                        <option value="50">50 km</option>
+                    </select>
+                </div>
+                <button class="btn-search" id="searchBtn" onclick="searchLeads()">Search Leads</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Scanning Google Maps for businesses...</p>
+        </div>
+
+        <div id="resultsArea" style="display:none;">
+            <div class="results-header">
+                <div>
+                    <h3>Results</h3>
+                    <span class="results-count" id="resultsCount"></span>
+                </div>
+                <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+            </div>
+            <div class="results-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Business</th>
+                            <th>Phone</th>
+                            <th>Rating</th>
+                            <th>Website Status</th>
+                            <th>Lead Score</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <h3>Search for leads</h3>
+            <p>Enter a business type and location above to find potential clients who need your services.</p>
+        </div>
+    </div>
+
+    <script>
+    // Simulated lead data generator (replace with real Google Maps API integration)
+    const sampleBusinesses = {
+        plumber: ['Mike\'s Plumbing', 'DrainPro Solutions', 'Aussie Pipes & Gas', 'QuickFlow Plumbing', 'AquaFix Services', 'Blue Tap Plumbing', 'PipeMaster Co', 'ClearDrain Plumbing', 'Reliable Plumbing AU', 'Joe\'s Emergency Plumbing', 'Southside Plumbing', 'Pacific Plumbing Group', 'Budget Plumb Co', 'AllDay Plumbing', 'Metro Pipe Services'],
+        electrician: ['Spark Right Electrical', 'PowerUp Electricians', 'BrightWire Co', 'SafeSwitch Electrical', 'Voltage Pro', 'AllSpark Electrical', 'Wired Up AU', 'CurrentFlow Services', 'Lightning Electrical', 'Switch On Electrical', 'Redline Electrics', 'ProVolt Solutions', 'GreenWire Electrical', 'Suburban Sparks', 'Flash Electrical Co'],
+        cafe: ['The Daily Grind', 'Morning Brew Cafe', 'Bean Counter Coffee', 'Sunrise Kitchen', 'The Corner Pot', 'Flat White Co', 'Urban Roast', 'Little Lane Cafe', 'Golden Cup Espresso', 'Leaf & Bean', 'Press Coffee House', 'Steam & Pour', 'The Laneway Kitchen', 'Baked & Brewed', 'Cup & Saucer Cafe'],
+        salon: ['Luxe Hair Studio', 'The Cut Above', 'Blonde Ambition', 'Shear Perfection', 'Mane Attraction', 'Fade Factory', 'Roots & Ends', 'Polished Hair Co', 'The Style Bar', 'Fresh Cuts AU', 'Tress & Co', 'Scissor Sisters Salon', 'The Blow Dry Bar', 'Strand Salon', 'Glow Hair Studio'],
+        builder: ['Solid Ground Constructions', 'Aussie Build Co', 'Foundation First Builders', 'Brick & Beam', 'TopLine Building', 'Urban Edge Construction', 'Precision Builds AU', 'Hammer & Nail Co', 'SteelFrame Solutions', 'Blue Sky Builders', 'Keystone Construction', 'TrueLevel Building', 'Summit Constructions', 'RedBrick Builders', 'ProFrame Homes'],
+    };
+
+    const suburbs = {
+        sydney: ['Parramatta', 'Bondi', 'Manly', 'Chatswood', 'Liverpool', 'Penrith', 'Newtown', 'Surry Hills', 'Marrickville', 'Blacktown', 'Bankstown', 'Hurstville', 'Cronulla', 'Dee Why', 'Ryde'],
+        melbourne: ['Richmond', 'Footscray', 'St Kilda', 'Brunswick', 'Fitzroy', 'Collingwood', 'South Yarra', 'Carlton', 'Doncaster', 'Box Hill', 'Dandenong', 'Frankston', 'Moonee Ponds', 'Preston', 'Northcote'],
+        brisbane: ['Fortitude Valley', 'South Bank', 'Paddington', 'New Farm', 'West End', 'Toowong', 'Chermside', 'Carindale', 'Indooroopilly', 'Wynnum', 'Bulimba', 'Ascot', 'Kangaroo Point', 'Clayfield', 'Nundah'],
+        perth: ['Fremantle', 'Subiaco', 'Leederville', 'Northbridge', 'Joondalup', 'Rockingham', 'Mandurah', 'Morley', 'Cannington', 'Scarborough'],
+        adelaide: ['Glenelg', 'Norwood', 'Prospect', 'Unley', 'Henley Beach', 'Modbury', 'Salisbury', 'Marion', 'Semaphore', 'Burnside'],
+    };
+
+    const phoneAreaCodes = { sydney: '02', melbourne: '03', brisbane: '07', perth: '08', adelaide: '08' };
+
+    function getCity(location) {
+        const loc = location.toLowerCase();
+        for (const city of Object.keys(suburbs)) {
+            if (loc.includes(city)) return city;
+        }
+        return 'sydney';
+    }
+
+    function randomPhone(city) {
+        const area = phoneAreaCodes[city] || '02';
+        return `${area} ${Math.floor(1000 + Math.random() * 9000)} ${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+
+    function randomRating() {
+        return (3 + Math.random() * 2).toFixed(1);
+    }
+
+    function randomReviews() {
+        return Math.floor(2 + Math.random() * 180);
+    }
+
+    function getWebsiteStatus() {
+        const r = Math.random();
+        if (r < 0.35) return { status: 'none', label: 'No Website', class: 'status-none' };
+        if (r < 0.65) return { status: 'poor', label: 'Poor Website', class: 'status-poor' };
+        return { status: 'ok', label: 'Has Website', class: 'status-ok' };
+    }
+
+    function getLeadScore(websiteStatus, reviews, rating) {
+        let score = 0;
+        if (websiteStatus === 'none') score += 40;
+        else if (websiteStatus === 'poor') score += 25;
+        if (reviews > 20) score += 20;
+        if (reviews > 50) score += 10;
+        if (parseFloat(rating) >= 4.0) score += 15;
+        if (parseFloat(rating) >= 4.5) score += 10;
+        score += Math.floor(Math.random() * 10);
+        return Math.min(score, 99);
+    }
+
+    let currentResults = [];
+
+    function searchLeads() {
+        const type = document.getElementById('businessType').value.trim().toLowerCase();
+        const location = document.getElementById('location').value.trim();
+
+        if (!type || !location) {
+            alert('Please enter both a business type and location.');
+            return;
+        }
+
+        document.getElementById('searchBtn').disabled = true;
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('resultsArea').style.display = 'none';
+        document.getElementById('loading').classList.add('active');
+
+        setTimeout(() => {
+            generateResults(type, location);
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('searchBtn').disabled = false;
+        }, 2000 + Math.random() * 1500);
+    }
+
+    function generateResults(type, location) {
+        const city = getCity(location);
+        const citySuburbs = suburbs[city] || suburbs.sydney;
+
+        // Find matching business names or generate generic ones
+        let names = null;
+        for (const [key, val] of Object.entries(sampleBusinesses)) {
+            if (type.includes(key) || key.includes(type)) {
+                names = val;
+                break;
+            }
+        }
+        if (!names) {
+            names = Array.from({ length: 15 }, (_, i) => {
+                const prefixes = ['Pro', 'Quick', 'Aussie', 'Metro', 'Premier', 'Elite', 'Local', 'TopNotch', 'AllStar', 'Reliable', 'Pacific', 'Southern', 'Harbour', 'Coast', 'Urban'];
+                const cap = type.charAt(0).toUpperCase() + type.slice(1);
+                return `${prefixes[i]} ${cap}`;
+            });
+        }
+
+        const count = 8 + Math.floor(Math.random() * 7);
+        const shuffled = [...names].sort(() => Math.random() - 0.5).slice(0, count);
+
+        currentResults = shuffled.map(name => {
+            const ws = getWebsiteStatus();
+            const rating = randomRating();
+            const reviews = randomReviews();
+            const score = getLeadScore(ws.status, reviews, rating);
+            const suburb = citySuburbs[Math.floor(Math.random() * citySuburbs.length)];
+            return {
+                name,
+                address: `${Math.floor(1 + Math.random() * 300)} ${['High St', 'Main Rd', 'George St', 'King Ave', 'Park Rd', 'Station St', 'Church St', 'Victoria Rd'][Math.floor(Math.random() * 8)]}, ${suburb}`,
+                phone: randomPhone(city),
+                rating,
+                reviews,
+                websiteStatus: ws.status,
+                websiteLabel: ws.label,
+                websiteClass: ws.class,
+                leadScore: score
+            };
+        });
+
+        // Sort by lead score descending (hottest leads first)
+        currentResults.sort((a, b) => b.leadScore - a.leadScore);
+
+        renderResults();
+    }
+
+    function renderResults() {
+        const tbody = document.getElementById('resultsBody');
+        const hotLeads = currentResults.filter(r => r.websiteStatus !== 'ok').length;
+
+        document.getElementById('resultsCount').textContent = `${currentResults.length} businesses found \u2022 ${hotLeads} hot leads`;
+
+        tbody.innerHTML = currentResults.map(r => {
+            const scoreClass = r.leadScore >= 60 ? 'score-hot' : r.leadScore >= 35 ? 'score-warm' : 'score-cold';
+            const starsHtml = '\u2605'.repeat(Math.round(parseFloat(r.rating))) + '\u2606'.repeat(5 - Math.round(parseFloat(r.rating)));
+
+            return `<tr>
+                <td>
+                    <div class="biz-name">${r.name}</div>
+                    <div class="biz-address">${r.address}</div>
+                </td>
+                <td>${r.phone}</td>
+                <td>
+                    <div class="rating">
+                        <span class="stars">${starsHtml}</span>
+                        <span class="review-count">${r.rating} (${r.reviews})</span>
+                    </div>
+                </td>
+                <td><span class="status-badge ${r.websiteClass}">${r.websiteLabel}</span></td>
+                <td><span class="lead-score ${scoreClass}">${r.leadScore}</span></td>
+                <td><button class="btn-action" onclick="auditLead('${encodeURIComponent(r.name)}')">Audit</button></td>
+            </tr>`;
+        }).join('');
+
+        document.getElementById('resultsArea').style.display = 'block';
+    }
+
+    function auditLead(name) {
+        const decoded = decodeURIComponent(name);
+        window.open(`website-audit.html?business=${encodeURIComponent(decoded)}`, '_blank');
+    }
+
+    function exportCSV() {
+        if (!currentResults.length) return;
+
+        const headers = ['Business Name', 'Address', 'Phone', 'Rating', 'Reviews', 'Website Status', 'Lead Score'];
+        const rows = currentResults.map(r => [
+            r.name, r.address, r.phone, r.rating, r.reviews, r.websiteLabel, r.leadScore
+        ]);
+
+        const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `leads-${document.getElementById('businessType').value}-${document.getElementById('location').value}-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Allow Enter key to trigger search
+    document.querySelectorAll('#businessType, #location').forEach(el => {
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') searchLeads(); });
+    });
+    </script>
+</body>
+</html>
