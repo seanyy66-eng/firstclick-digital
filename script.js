@@ -85,32 +85,45 @@ document.querySelectorAll('.service-card, .package-card, .client-card, .why-item
     observer.observe(el);
 });
 
-// Contact form handling
+// Contact form handling via Formspree
 const contactForm = document.getElementById('contactForm');
 contactForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-
-    // Simple validation visual feedback
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.textContent;
     btn.textContent = 'Sending...';
     btn.disabled = true;
 
-    // Simulate form submission (replace with actual endpoint)
-    setTimeout(() => {
-        btn.textContent = 'Message Sent!';
-        btn.style.background = '#10b981';
-        this.reset();
-
+    fetch(this.action, {
+        method: 'POST',
+        body: new FormData(this),
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(response => {
+        if (response.ok) {
+            btn.textContent = 'Message Sent!';
+            btn.style.background = '#10b981';
+            this.reset();
+        } else {
+            btn.textContent = 'Error - Try Again';
+            btn.style.background = '#ef4444';
+        }
         setTimeout(() => {
             btn.textContent = originalText;
             btn.style.background = '';
             btn.disabled = false;
         }, 3000);
-    }, 1500);
+    })
+    .catch(() => {
+        btn.textContent = 'Error - Try Again';
+        btn.style.background = '#ef4444';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+            btn.disabled = false;
+        }, 3000);
+    });
 });
 
 // Active nav link highlighting on scroll
