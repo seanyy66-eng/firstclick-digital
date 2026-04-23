@@ -1352,7 +1352,22 @@ a, button, [role="button"], select, .trade-tag, .service-card, .package-card, .s
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
-    align-items: start;
+    align-items: stretch;
+}
+
+.package-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.package-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.package-features {
+    flex: 1;
 }
 
 .package-card {
